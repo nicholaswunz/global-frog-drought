@@ -1,8 +1,8 @@
-# frog-drought-global
+# The global impact of drought on frog diversity
 
 This repository contains code and data needed to reproduce the article:
 
-**Wu N. C., xxxxx & Seebacher, F.** Frog drought study (In submission) *Journal name*, **xx**, xxx-xxx, DOI: https://doi.org/10.1111/gcb.15127
+**Wu N. C., xxxxx & Seebacher, F.** The global impact of drought on frog diversity (In submission) *Journal name*, **xx**, xxx-xxx, DOI: https://doi.org/10.1111/gcb.15127
 
 **Raw data**
 - ucrit_all.csv  - Raw Ucrit data used for the analysis.
