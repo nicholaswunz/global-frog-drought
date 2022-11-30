@@ -58,8 +58,11 @@ hydro.range <- function(ecto, hyd, min.water){
 }
 
 
-update.hyd <- function(ecto, hyd){
+update.hyd <- function(ecto, hyd, max.hyd){
   newhyd <- hyd - data.frame(ecto$masbal)$H2OCut_g
+  if(newhyd > max.hyd) {
+    newhyd <- hyd
+  }
   return(newhyd)
 }
 
@@ -70,8 +73,7 @@ rehydrate <- function(micro.output, env, hyd, hyd.current, hyd.rate=0.01, x){
   wpot.soil <- micro.output$soilpot[x,dep]
   if(wpot.soil >= -72.5){
     newhyd <- hyd.current + hyd.rate * ((hyd - hyd.current) / hyd)
-  }
-  else{
+  } else {
     newhyd <- hyd.current
   }
   return(newhyd)
@@ -125,7 +127,7 @@ environment <- function(micro.output, activity, x){
 
 
 # function to run ectotherm simulations
-sim.ecto <- function(micro, behav='diurnal', Tmax=30, Tmin=10, min.hyd=70, hyd.rate = 3,
+sim.ecto <- function(micro, behav='nocturnal', Tmax=30, Tmin=10, min.hyd=70, hyd.rate = 3,
                      Ww_g = 40,
                      shape = 4,
                      alpha = 0.85,
@@ -203,7 +205,7 @@ sim.ecto <- function(micro, behav='diurnal', Tmax=30, Tmin=10, min.hyd=70, hyd.r
                                               x = x))
         TBs <- c(TBs, ecto$TC)
       } else {
-        hydration <- c(hydration, update.hyd(ecto, hydration[x]))
+        hydration <- c(hydration, update.hyd(ecto, hydration[x], hyd))
         TBs <- c(TBs, ecto$TC)
       }
     } else {
