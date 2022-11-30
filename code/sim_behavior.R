@@ -9,14 +9,19 @@ source('behav_functions.R')
 
 longlat    <- c(153.09249, -27.6235) # Karawatha, QLD.
 micro <- micro_global_drought(loc=longlat, rainfact = 0.54,
-                              runmoist = T, runshade = T, timeinterval = 12)
+                              runmoist = T, runshade = T, 
+                              timeinterval = 12)
+# micro <- micro_global_drought(runmoist = T, runshade = T, 
+#                               timeinterval = 12)
 
-sim.res <- sim.ecto(micro, behav = 'both')
+micro.output <- retrieve.output(micro)
+
+
+sim.res <- sim.ecto(micro, behav = 'diurnal')
 
 sim.res <- unlist(sim.res)
+
 plot(sim.res, type='l')
-
-
 
 
 
