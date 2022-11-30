@@ -46,6 +46,23 @@ thermal.range <- function(TCinit, Tmax=30, Tmin=10, x){
 
 
 
+# activity based on tolerance to desiccation
+hydro.range <- function(ecto, hyd, min.hyd=90){
+  newhyd <- hyd - data.frame(ecto$masbal)$H2OCut_g
+  if(newhyd <= hyd * min.hyd/100){
+    FALSE
+  } else {
+    TRUE
+  }
+}
+
+
+update.hyd <- function(ecto, hyd){
+  newhyd <- hyd - data.frame(ecto$masbal)$H2OCut_g
+  return(newhyd)
+}
+
+
 # function to find frogs position below-ground
 seldep <- function(micro.output, CTmax = 30, CTmin = 10, x){
   soil.temps <- micro.output$soil[x, 4:12] # soil temperatures from 2.5cm to 2m
@@ -92,29 +109,42 @@ environment <- function(micro.output, activity, x){
 
 
 # function to run ectotherm simulations
-sim.ecto <- function(micro, behav='diurnal', Tmax=30, Tmin=10){
+sim.ecto <- function(micro, behav='diurnal', Tmax=30, Tmin=10, min.hyd=70){
   
   micro.output <- retrieve.output(micro)
   
-  lapply(1:(micro$ndays * 24), function(x){
-    
+  Ww_g = 40
+  shape = 4
+  alpha = 0.85
+  M_1 = 0
+  postur = 0
+  pantmax = 0
+  pct_cond = 40
+  pct_wet = 80 # 0.01
+  K_sub = 0.1
+  alpha_sub = (1 - micro$REF)
+  elev = micro$elev
+  
+  hyd <- Ww_g * 70/100 # grams
+  hydration <- hyd
+  
+  for(x in 1:(micro$ndays * 24)){ 
     zenith <- micro.output$metout$ZEN[x]
     act <- activity(micro.output, behav=behav, Z=zenith)
     
     if(act){
       env <- environment(micro.output, act, x)
-      ecto <- ectoR_devel(Ww_g = 40,
-                          shape = 4,
-                          alpha = 0.85,
-                          M_1 = 0,
-                          postur = 0,
-                          pantmax = 0,
-                          pct_cond = 40,
-                          pct_wet = 0.01,
-                          #pct_wet = 80,
-                          K_sub = 0.1,
-                          alpha_sub = (1 - micro$REF),
-                          elev = micro$elev,
+      ecto <- ectoR_devel(Ww_g = Ww_g,
+                          shape = shape,
+                          alpha = alpha,
+                          M_1 = M_1,
+                          postur = postur,
+                          pantmax = pantmax,
+                          pct_cond = pct_cond,
+                          pct_wet = pct_wet,
+                          K_sub = K_sub,
+                          alpha_sub = alpha_sub,
+                          elev = elev,
                           TA = env$TA,
                           TGRD = env$TGRD,
                           TSUBST = env$TGRD,
@@ -125,20 +155,20 @@ sim.ecto <- function(micro, behav='diurnal', Tmax=30, Tmin=10){
                           Z = zenith)
       TCinit <- ecto$TC
       suit.therm <- thermal.range(TCinit, Tmax=Tmax, Tmin=Tmin, x)
-      if(!suit.therm){
+      suit.hydro <- hydro.range(ecto, hyd = hydration[x], min.hyd = min.hyd)
+      if(!(suit.therm) | !(suit.hydro)){
         env <- environment(micro.output, act=FALSE, x)
-        ecto <- ectoR_devel(Ww_g = 40,
-                            shape = 4,
-                            alpha = 0.85,
-                            M_1 = 0,
-                            postur = 0,
-                            pantmax = 0,
-                            pct_cond = 40,
-                            pct_wet = 0.01,
-                            #pct_wet = 80,
-                            K_sub = 0.1,
-                            alpha_sub = (1 - micro$REF),
-                            elev = micro$elev,
+        ecto <- ectoR_devel(Ww_g = Ww_g,
+                            shape = shape,
+                            alpha = alpha,
+                            M_1 = M_1,
+                            postur = postur,
+                            pantmax = pantmax,
+                            pct_cond = pct_cond,
+                            pct_wet = pct_wet,
+                            K_sub = K_sub,
+                            alpha_sub = alpha_sub,
+                            elev = elev,
                             TA = env$TA,
                             TGRD = env$TGRD,
                             TSUBST = env$TGRD,
@@ -147,23 +177,24 @@ sim.ecto <- function(micro, behav='diurnal', Tmax=30, Tmin=10){
                             RH = env$RH,
                             QSOLR = env$QSOLR,
                             Z = zenith)
+        hydration <- c(hydration, hyd)
       }
+      hydration <- c(hydration, update.hyd(ecto, hydration[x]))
       
-    } else {
+    } 
+    else {
       env <- environment(micro.output, act=act, x)
-      
-      ecto <- ectoR_devel(Ww_g = 40,
-                          shape = 4,
-                          alpha = 0.85,
-                          M_1 = 0,
-                          postur = 0,
-                          pantmax = 0,
-                          pct_cond = 40,
-                          pct_wet = 0.01,
-                          #pct_wet = 80,
-                          K_sub = 0.1,
-                          alpha_sub = (1 - micro$REF),
-                          elev = micro$elev,
+      ecto <- ectoR_devel(Ww_g = Ww_g,
+                          shape = shape,
+                          alpha = alpha,
+                          M_1 = M_1,
+                          postur = postur,
+                          pantmax = pantmax,
+                          pct_cond = pct_cond,
+                          pct_wet = pct_wet,
+                          K_sub = K_sub,
+                          alpha_sub = alpha_sub,
+                          elev = elev,
                           TA = env$TA,
                           TGRD = env$TGRD,
                           TSUBST = env$TGRD,
@@ -172,12 +203,13 @@ sim.ecto <- function(micro, behav='diurnal', Tmax=30, Tmin=10){
                           RH = env$RH,
                           QSOLR = env$QSOLR,
                           Z = zenith)
+      hydration <- c(hydration, hyd)
     }
     
-    
-    ecto$TC
-    #print(x)
-  })
+  }
+  
+  return(hydration)
+  
 }
 
 

@@ -17,9 +17,8 @@ micro <- micro_global_drought(loc=longlat, rainfact = 0.54,
 micro.output <- retrieve.output(micro)
 
 
-sim.res <- sim.ecto(micro, behav = 'diurnal')
-
-sim.res <- unlist(sim.res)
+sim.res <- sim.ecto(micro, behav = 'nocturnal', min.hyd=90)
+#sim.res <- unlist(sim.res)
 
 plot(sim.res, type='l')
 
