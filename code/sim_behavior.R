@@ -20,7 +20,8 @@ micro.output <- retrieve.output(micro)
 sim.res <- sim.ecto(micro, behav = 'nocturnal', min.hyd=90)
 #sim.res <- unlist(sim.res)
 
-plot(sim.res, type='l')
+plot(sim.res$hydration, type='l')
+plot(sim.res$TBs, type='l')
 
 
 

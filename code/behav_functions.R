@@ -128,6 +128,8 @@ sim.ecto <- function(micro, behav='diurnal', Tmax=30, Tmin=10, min.hyd=70){
   hyd <- Ww_g * 70/100 # grams
   hydration <- hyd
   
+  TBs <- c()
+  
   for(x in 1:(micro$ndays * 24)){ 
     zenith <- micro.output$metout$ZEN[x]
     act <- activity(micro.output, behav=behav, Z=zenith)
@@ -178,9 +180,10 @@ sim.ecto <- function(micro, behav='diurnal', Tmax=30, Tmin=10, min.hyd=70){
                             QSOLR = env$QSOLR,
                             Z = zenith)
         hydration <- c(hydration, hyd)
+        TBs <- c(TBs, ecto$TC)
       }
       hydration <- c(hydration, update.hyd(ecto, hydration[x]))
-      
+      TBs <- c(TBs, ecto$TC)
     } 
     else {
       env <- environment(micro.output, act=act, x)
@@ -204,11 +207,11 @@ sim.ecto <- function(micro, behav='diurnal', Tmax=30, Tmin=10, min.hyd=70){
                           QSOLR = env$QSOLR,
                           Z = zenith)
       hydration <- c(hydration, hyd)
+      TBs <- c(TBs, ecto$TC)
     }
-    
   }
   
-  return(hydration)
+  return(list(hydration=hydration, TBs=TBs))
   
 }
 
