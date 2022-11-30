@@ -36,8 +36,9 @@ activity <- function(micro.output, behav=c('diurnal', 'nocturnal', 'both'), Z=Z)
 
 
 # activity based on thermal range
-thermal.range <- function(TCinit, Tmax=30, Tmin=10, x){
-  if(TCinit > Tmax | TCinit < Tmin){
+thermal.range <- function(ecto, Tmax=30, Tmin=10){
+  TC <- ecto$TC
+  if(TC > Tmax | TC < Tmin){
     FALSE
   } else{
     TRUE
@@ -47,9 +48,9 @@ thermal.range <- function(TCinit, Tmax=30, Tmin=10, x){
 
 
 # activity based on tolerance to desiccation
-hydro.range <- function(ecto, hyd, min.hyd=90){
+hydro.range <- function(ecto, hyd, min.water){
   newhyd <- hyd - data.frame(ecto$masbal)$H2OCut_g
-  if(newhyd <= hyd * min.hyd/100){
+  if(newhyd <= min.water){
     FALSE
   } else {
     TRUE
@@ -59,6 +60,20 @@ hydro.range <- function(ecto, hyd, min.hyd=90){
 
 update.hyd <- function(ecto, hyd){
   newhyd <- hyd - data.frame(ecto$masbal)$H2OCut_g
+  return(newhyd)
+}
+
+
+
+rehydrate <- function(micro.output, env, hyd, hyd.current, hyd.rate=0.01, x){
+  dep <- paste0('PT',substr(env$dep,2,nchar(env$dep)))
+  wpot.soil <- micro.output$soilpot[x,dep]
+  if(wpot.soil >= -72.5){
+    newhyd <- hyd.current + hyd.rate * ((hyd - hyd.current) / hyd)
+  }
+  else{
+    newhyd <- hyd.current
+  }
   return(newhyd)
 }
 
@@ -79,6 +94,7 @@ environment <- function(micro.output, activity, x){
   
   if(activity){
     # above-ground
+    dep <- "D0cm"
     metout <- micro.output$metout
     
     # get required inputs
@@ -102,33 +118,33 @@ environment <- function(micro.output, activity, x){
     # EMISSB <- 1.0
     # EMISSK <- 1.0
   }
-  return(list(TA=TA, TGRD=TGRD, TSKY=TSKY, VEL=VEL, RH=RH, QSOLR=QSOLR))
+  return(list(TA=TA, TGRD=TGRD, TSKY=TSKY, VEL=VEL, RH=RH, QSOLR=QSOLR, dep=dep))
 }
 
 
 
 
 # function to run ectotherm simulations
-sim.ecto <- function(micro, behav='diurnal', Tmax=30, Tmin=10, min.hyd=70){
+sim.ecto <- function(micro, behav='diurnal', Tmax=30, Tmin=10, min.hyd=70, hyd.rate = 3,
+                     Ww_g = 40,
+                     shape = 4,
+                     alpha = 0.85,
+                     M_1 = 0,
+                     postur = 0,
+                     pantmax = 0,
+                     pct_cond = 40,
+                     pct_wet = 80, # 0.01
+                     K_sub = 0.1,
+                     alpha_sub = (1 - micro$REF),
+                     elev = micro$elev){
   
   micro.output <- retrieve.output(micro)
   
-  Ww_g = 40
-  shape = 4
-  alpha = 0.85
-  M_1 = 0
-  postur = 0
-  pantmax = 0
-  pct_cond = 40
-  pct_wet = 80 # 0.01
-  K_sub = 0.1
-  alpha_sub = (1 - micro$REF)
-  elev = micro$elev
+  hyd <- Ww_g * 70/100 # water content ob body in grams
+  min.water <- hyd * min.hyd/100
   
-  hyd <- Ww_g * 70/100 # grams
-  hydration <- hyd
-  
-  TBs <- c()
+  hydration <- hyd # where results will be stored
+  TBs <- c() # where results will be stored
   
   for(x in 1:(micro$ndays * 24)){ 
     zenith <- micro.output$metout$ZEN[x]
@@ -155,9 +171,10 @@ sim.ecto <- function(micro, behav='diurnal', Tmax=30, Tmin=10, min.hyd=70){
                           RH = env$RH,
                           QSOLR = env$QSOLR,
                           Z = zenith)
-      TCinit <- ecto$TC
-      suit.therm <- thermal.range(TCinit, Tmax=Tmax, Tmin=Tmin, x)
-      suit.hydro <- hydro.range(ecto, hyd = hydration[x], min.hyd = min.hyd)
+      
+      suit.therm <- thermal.range(ecto, Tmax = Tmax, Tmin = Tmin)
+      suit.hydro <- hydro.range(ecto, hyd = hydration[x], min.water = min.water)
+      
       if(!(suit.therm) | !(suit.hydro)){
         env <- environment(micro.output, act=FALSE, x)
         ecto <- ectoR_devel(Ww_g = Ww_g,
@@ -179,13 +196,17 @@ sim.ecto <- function(micro, behav='diurnal', Tmax=30, Tmin=10, min.hyd=70){
                             RH = env$RH,
                             QSOLR = env$QSOLR,
                             Z = zenith)
-        hydration <- c(hydration, hyd)
+        hydration <- c(hydration, rehydrate(micro.output, env, 
+                                              hyd = hyd, 
+                                              hyd.current = hydration[x], 
+                                              hyd.rate=hyd.rate, 
+                                              x = x))
+        TBs <- c(TBs, ecto$TC)
+      } else {
+        hydration <- c(hydration, update.hyd(ecto, hydration[x]))
         TBs <- c(TBs, ecto$TC)
       }
-      hydration <- c(hydration, update.hyd(ecto, hydration[x]))
-      TBs <- c(TBs, ecto$TC)
-    } 
-    else {
+    } else {
       env <- environment(micro.output, act=act, x)
       ecto <- ectoR_devel(Ww_g = Ww_g,
                           shape = shape,
@@ -206,11 +227,15 @@ sim.ecto <- function(micro, behav='diurnal', Tmax=30, Tmin=10, min.hyd=70){
                           RH = env$RH,
                           QSOLR = env$QSOLR,
                           Z = zenith)
-      hydration <- c(hydration, hyd)
+      hydration <- c(hydration, rehydrate(micro.output, env, 
+                                          hyd = hyd, 
+                                          hyd.current = hydration[x], 
+                                          hyd.rate=hyd.rate, 
+                                          x = x))
       TBs <- c(TBs, ecto$TC)
     }
   }
-  
+    
   return(list(hydration=hydration, TBs=TBs))
   
 }
