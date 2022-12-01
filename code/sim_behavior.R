@@ -76,3 +76,21 @@ sum(sim.res.wateract$act) /2
 sum(sim.res.wateract.waterdep$act) /2
 
 
+
+
+# compare to the ectotherm model in NicheMapR with similar behavior
+ecto_nmr <- ectotherm(Ww_g = 40, shape = 4, M_1 = 0, M_2 = 0, M_3 = 0,
+          postur = 0, pantmax = 0, pct_cond = 40, pct_wet = 80, # 0.01
+          CT_min = 10, T_RB_min = 10, T_B_min = 10, T_F_min = 10,
+          T_pref = 25, T_F_max = 30, CT_max = 30,
+          diurn = 0, nocturn = 1, crepus = 0, shade_seek = 0)
+
+environ <- data.frame(ecto_nmr$environ)
+
+
+with(environ, plot(TC, type='l'))
+with(sim.res, points(TBs, type='l', col='red'))
+# R is much slower than fortran
+# but out results are equivalent to NicheMapR
+
+
