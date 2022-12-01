@@ -65,5 +65,14 @@ plot(sim.res.wateract.waterdep$act, type='l')
 plot(-sim.res.wateract.waterdep$dep, type='l')
 
 
+range(sim.res$hydration)
+range(sim.res.waterdep$hydration)
+range(sim.res.wateract$hydration)
+range(sim.res.wateract.waterdep$hydration)
+
+sum(sim.res$act) /2 # activity hours per year
+sum(sim.res.waterdep$act) /2
+sum(sim.res.wateract$act) /2
+sum(sim.res.wateract.waterdep$act) /2
 
 

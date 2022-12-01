@@ -84,16 +84,18 @@ rehydrate <- function(micro.output, env, hyd, hyd.current, hyd.rate=0.01, x){
 
 
 # function to find frogs position below-ground
-seldep <- function(micro.output, CTmax = 30, CTmin = 10, water=FALSE, x){
+seldep <- function(micro.output, Tmax = 30, Tmin = 10, water=FALSE, x){
   if(!water){
     soil.temps <- micro.output$soil[x, 4:12] # soil temperatures from 2.5cm to 2m
-    # selects the shallowest node with temperatures between CTmax and CTmin
-    sel.node <- which(soil.temps <= CTmax & soil.temps >= CTmin)[1]
+    # selects the shallowest node with temperatures between Tmax and Tmin
+    sel.node <- which(soil.temps <= Tmax & soil.temps >= Tmin)[1]
     colnames(soil.temps)[sel.node]
   } else {
+    soil.temps <- micro.output$soil[x, 4:12] # soil temperatures from 2.5cm to 2m
     soil.pots <- micro.output$soilpot[x, 4:12] # soil temperatures from 2.5cm to 2m
     # selects the shallowest node with water potential >= -72.5
-    sel.node <- which(soil.pots >= -72.5)[1]
+    # and with temperatures between Tmax and Tmin
+    sel.node <- which(soil.temps <= Tmax & soil.temps >= Tmin & soil.pots >= -72.5)[1]
     paste0('D', substr(colnames(soil.pots)[sel.node], 3, nchar(colnames(soil.pots)[sel.node])))
   }
 }
@@ -119,7 +121,7 @@ environment <- function(micro.output, activity, water=TRUE, x){
   }
   else {
     # below-ground
-    dep <- seldep(micro.output, CTmax = 30, CTmin = 10, water=water, x)
+    dep <- seldep(micro.output, Tmax = 30, Tmin = 10, water=water, x)
     
     TA <- soil[,dep][x]
     TGRD <- TA
