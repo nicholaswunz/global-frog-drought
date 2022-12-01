@@ -58,6 +58,7 @@ hydro.range <- function(ecto, hyd, min.water){
 }
 
 
+# update hydration state based on evaporative water loss
 update.hyd <- function(ecto, hyd, max.hyd){
   newhyd <- hyd - data.frame(ecto$masbal)$H2OCut_g
   if(newhyd > max.hyd) {
@@ -71,6 +72,7 @@ update.hyd <- function(ecto, hyd, max.hyd){
 
 
 
+# gain water from the soil based on re-hydration rates
 rehydrate <- function(micro.output, env, hyd, hyd.current, hyd.rate=0.01, x){
   dep <- paste0('PT',substr(env$dep,2,nchar(env$dep)))
   wpot.soil <- micro.output$soilpot[x,dep]
@@ -101,7 +103,7 @@ seldep <- function(micro.output, Tmax = 30, Tmin = 10, water=FALSE, x){
 }
 
 
-# set the environment given activity (1 = active above-ground; 0 = below-ground)
+# set the environment given activity (TRUE = active above-ground; FALSE = below-ground)
 environment <- function(micro.output, activity, water=TRUE, x){
   
   soil <- micro.output$soil
