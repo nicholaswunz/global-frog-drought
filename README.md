@@ -8,7 +8,7 @@ This repository contains code and data needed to reproduce the article:
 - raw_data.csv  - Raw hydrological data obtained from the literature used for the analysis.
 
 **code**
-To include
+- To include
 
 **Analysis workflow**
 - supplementary_information.html - Supplementary information which contains the R workflow for processing and analysing the raw data, creating figures, and supplementary material for statistical outcomes, additional figures, and descriptions from the main document.
