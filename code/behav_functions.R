@@ -73,8 +73,12 @@ update.hyd <- function(ecto, hyd, max.hyd){
 
 
 # gain water from the soil based on re-hydration rates
-rehydrate <- function(micro.output, env, hyd, hyd.current, hyd.rate=0.01, x){
-  dep <- paste0('PT',substr(env$dep,2,nchar(env$dep)))
+rehydrate <- function(micro.output, env, climb, hyd, hyd.current, hyd.rate=0.01, x){
+  if(climb){
+    dep <- 'PT0cm'
+  } else {
+    dep <- paste0('PT',substr(env$dep,2,nchar(env$dep)))
+  }
   wpot.soil <- micro.output$soilpot[x,dep]
   if(wpot.soil >= -72.5){
     newhyd <- hyd.current + hyd.rate * ((hyd - hyd.current) / hyd)
@@ -113,7 +117,8 @@ seldep <- function(micro.output, Tmax = 30, Tmin = 10, water=FALSE, in.shade=FAL
 
 
 # set the environment given activity (TRUE = active above-ground; FALSE = below-ground)
-environment <- function(micro.output, activity, Tmax = 30, Tmin = 10, water=TRUE, in.shade=FALSE, x){
+environment <- function(micro.output, activity=TRUE, Tmax = 30, Tmin = 10, water=TRUE, in.shade=FALSE, 
+                        burrow=TRUE, climb=FALSE, x){
   
   if(!in.shade){
     soil <- micro.output$soil
@@ -122,24 +127,44 @@ environment <- function(micro.output, activity, Tmax = 30, Tmin = 10, water=TRUE
   }
   
   
-  if(activity){
-    # above-ground
-    dep <- "D0cm"
-    if(!in.shade){
-      metout <- micro.output$metout
+  if(activity | !burrow){
+    if(climb){ # warning, activity has to be true
+      # above-ground
+      dep <- "D-150cm"
+      if(!in.shade){
+        metout <- micro.output$metout
+      } else {
+        metout <- micro.output$shadmet
+        metout$SOLR <- metout$SOLR * 0.1
+      }
+      
+      # get required inputs
+      TA <- metout$TAREF[x]
+      TGRD <- TA
+      TSKY <- metout$TSKYC[x]
+      VEL <- metout$VREF[x]
+      RH <- metout$RH[x]
+      QSOLR <- metout$SOLR[x]
     } else {
-      metout <- micro.output$shadmet
+      # above-ground
+      dep <- "D0cm"
+      if(!in.shade){
+        metout <- micro.output$metout
+      } else {
+        metout <- micro.output$shadmet
+        metout$SOLR <- metout$SOLR * 0.1
+      }
+      
+      # get required inputs
+      TA <- metout$TALOC[x]
+      TGRD <- soil$D0cm[x]
+      TSKY <- metout$TSKYC[x]
+      VEL <- metout$VLOC[x]
+      RH <- metout$RHLOC[x]
+      QSOLR <- metout$SOLR[x]
     }
     
-    # get required inputs
-    TA <- metout$TALOC[x]
-    TGRD <- soil$D0cm[x]
-    TSKY <- metout$TSKYC[x]
-    VEL <- metout$VLOC[x]
-    RH <- metout$RHLOC[x]
-    QSOLR <- metout$SOLR[x]
-  }
-  else {
+  } else {
     # below-ground
     dep <- seldep(micro.output, Tmax = Tmax, Tmin = Tmin, water=water, in.shade=in.shade, x)
     
@@ -161,6 +186,7 @@ environment <- function(micro.output, activity, Tmax = 30, Tmin = 10, water=TRUE
 # function to run ectotherm simulations
 sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade = FALSE,
                      min.hyd = 70, hyd.rate = 3, water = TRUE, water.act = TRUE,
+                     burrow=TRUE, climb=FALSE,
                      Ww_g = 40,
                      shape = 4,
                      alpha = 0.85,
@@ -189,7 +215,9 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
     ACTs <- c(ACTs, act)
     
     if(act){
-      env <- environment(micro.output, act, Tmax = Tmax, Tmin = Tmin, water=water, in.shade=in.shade, x)
+      env <- environment(micro.output, act, Tmax = Tmax, Tmin = Tmin, 
+                         water=water, in.shade=in.shade,
+                         burrow=burrow, climb=FALSE, x)
       DEPs <- c(DEPs, as.double(substr(env$dep, 2, nchar(env$dep)-2)))
       ecto <- ectoR_devel(Ww_g = Ww_g,
                           shape = shape,
@@ -219,40 +247,117 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
       }
       
       if(!(suit.therm) | !(suit.hydro)){
-        env <- environment(micro.output, act=FALSE, Tmax = Tmax, Tmin = Tmin, water=water, in.shade=in.shade, x)
-        DEPs <- c(DEPs, as.double(substr(env$dep, 2, nchar(env$dep)-2)))
-        ecto <- ectoR_devel(Ww_g = Ww_g,
-                            shape = shape,
-                            alpha = alpha,
-                            M_1 = M_1,
-                            postur = postur,
-                            pantmax = pantmax,
-                            pct_cond = pct_cond,
-                            pct_wet = pct_wet,
-                            K_sub = K_sub,
-                            alpha_sub = alpha_sub,
-                            elev = elev,
-                            TA = env$TA,
-                            TGRD = env$TGRD,
-                            TSUBST = env$TGRD,
-                            TSKY = env$TSKY,
-                            VEL = env$VEL,
-                            RH = env$RH,
-                            QSOLR = env$QSOLR,
-                            Z = zenith)
-        hydration <- c(hydration, rehydrate(micro.output, env, 
+        if(!climb){
+          env <- environment(micro.output, act=FALSE, Tmax = Tmax, Tmin = Tmin, 
+                             water=water, in.shade=in.shade,
+                             burrow=burrow, climb=climb, x)
+          DEPs <- c(DEPs, as.double(substr(env$dep, 2, nchar(env$dep)-2)))
+          ecto <- ectoR_devel(Ww_g = Ww_g,
+                              shape = shape,
+                              alpha = alpha,
+                              M_1 = M_1,
+                              postur = postur,
+                              pantmax = pantmax,
+                              pct_cond = pct_cond,
+                              pct_wet = pct_wet,
+                              K_sub = K_sub,
+                              alpha_sub = alpha_sub,
+                              elev = elev,
+                              TA = env$TA,
+                              TGRD = env$TGRD,
+                              TSUBST = env$TGRD,
+                              TSKY = env$TSKY,
+                              VEL = env$VEL,
+                              RH = env$RH,
+                              QSOLR = env$QSOLR,
+                              Z = zenith)
+          hydration <- c(hydration, rehydrate(micro.output, env, 
+                                              climb = FALSE, 
                                               hyd = hyd, 
                                               hyd.current = hydration[x], 
                                               hyd.rate=hyd.rate, 
                                               x = x))
-        TBs <- c(TBs, ecto$TC)
-        ACTs[x] <- (suit.therm) & (suit.hydro)
+          TBs <- c(TBs, ecto$TC)
+          ACTs[x] <- (suit.therm) & (suit.hydro)
+        } else {
+          env <- environment(micro.output, act=act, Tmax = Tmax, Tmin = Tmin, 
+                             water=water, in.shade=in.shade,
+                             burrow=burrow, climb=climb, x)
+          DEPs <- c(DEPs, as.double(substr(env$dep, 2, nchar(env$dep)-2)))
+          ecto <- ectoR_devel(Ww_g = Ww_g,
+                              shape = shape,
+                              alpha = alpha,
+                              M_1 = M_1,
+                              postur = postur,
+                              pantmax = pantmax,
+                              pct_cond = pct_cond,
+                              pct_wet = pct_wet,
+                              K_sub = K_sub,
+                              alpha_sub = alpha_sub,
+                              elev = elev,
+                              TA = env$TA,
+                              TGRD = env$TGRD,
+                              TSUBST = env$TGRD,
+                              TSKY = env$TSKY,
+                              VEL = env$VEL,
+                              RH = env$RH,
+                              QSOLR = env$QSOLR,
+                              Z = zenith)
+          
+          suit.therm <- thermal.range(ecto, Tmax = Tmax, Tmin = Tmin)
+          if(water.act){
+            suit.hydro <- hydro.range(ecto, hyd = hydration[x], min.water = min.water)
+          } else {
+            suit.hydro = TRUE
+          }
+          
+          if(!(suit.therm) | !(suit.hydro)){
+            env <- environment(micro.output, act=FALSE, Tmax = Tmax, Tmin = Tmin, 
+                               water=water, in.shade=in.shade,
+                               burrow=burrow, climb=FALSE, x)
+            DEPs <- c(DEPs, as.double(substr(env$dep, 2, nchar(env$dep)-2)))
+            ecto <- ectoR_devel(Ww_g = Ww_g,
+                                shape = shape,
+                                alpha = alpha,
+                                M_1 = M_1,
+                                postur = postur,
+                                pantmax = pantmax,
+                                pct_cond = pct_cond,
+                                pct_wet = pct_wet,
+                                K_sub = K_sub,
+                                alpha_sub = alpha_sub,
+                                elev = elev,
+                                TA = env$TA,
+                                TGRD = env$TGRD,
+                                TSUBST = env$TGRD,
+                                TSKY = env$TSKY,
+                                VEL = env$VEL,
+                                RH = env$RH,
+                                QSOLR = env$QSOLR,
+                                Z = zenith)
+            hydration <- c(hydration, rehydrate(micro.output, env, 
+                                                climb = FALSE, 
+                                                hyd = hyd, 
+                                                hyd.current = hydration[x], 
+                                                hyd.rate=hyd.rate, 
+                                                x = x))
+            TBs <- c(TBs, ecto$TC)
+            ACTs[x] <- (suit.therm) & (suit.hydro)
+          } else {
+            hydration <- c(hydration, update.hyd(ecto, hydration[x], hyd))
+            TBs <- c(TBs, ecto$TC)
+          }
+          
+        }
+        
       } else {
         hydration <- c(hydration, update.hyd(ecto, hydration[x], hyd))
         TBs <- c(TBs, ecto$TC)
       }
     } else {
-      env <- environment(micro.output, act=act, Tmax = Tmax, Tmin = Tmin, water=water, in.shade=in.shade, x)
+      env <- environment(micro.output, act=act, Tmax = Tmax, Tmin = Tmin, 
+                         water=water, in.shade=in.shade,
+                         burrow=burrow, climb=FALSE, x)
       DEPs <- c(DEPs, as.double(substr(env$dep, 2, nchar(env$dep)-2)))
       ecto <- ectoR_devel(Ww_g = Ww_g,
                           shape = shape,
@@ -273,7 +378,8 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
                           RH = env$RH,
                           QSOLR = env$QSOLR,
                           Z = zenith)
-      hydration <- c(hydration, rehydrate(micro.output, env, 
+      hydration <- c(hydration, rehydrate(micro.output, env,
+                                          climb = climb,
                                           hyd = hyd, 
                                           hyd.current = hydration[x], 
                                           hyd.rate=hyd.rate, 
@@ -281,7 +387,7 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
       TBs <- c(TBs, ecto$TC)
     }
   }
-    
+  
   return(list(hydration=hydration, TBs=TBs, act=ACTs, dep=DEPs))
   
 }
