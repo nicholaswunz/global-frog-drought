@@ -92,7 +92,7 @@ ecto_nmr <- ectotherm(Ww_g = 40, shape = 4, M_1 = 0, M_2 = 0, M_3 = 0,
           CT_min = 10, T_RB_min = 10, T_B_min = 10, T_F_min = 10,
           T_pref = 25, T_F_max = 30, CT_max = 30,
           diurn = 0, nocturn = 1, crepus = 0, shade_seek = 0,
-          shdburrow = 2, minshades = micro$minshade)
+          shdburrow = 2, minshades = micro$maxshade)
 
 environ <- data.frame(ecto_nmr$environ)
 
