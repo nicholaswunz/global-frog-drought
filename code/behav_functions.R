@@ -86,15 +86,24 @@ rehydrate <- function(micro.output, env, hyd, hyd.current, hyd.rate=0.01, x){
 
 
 # function to find frogs position below-ground
-seldep <- function(micro.output, Tmax = 30, Tmin = 10, water=FALSE, x){
+seldep <- function(micro.output, Tmax = 30, Tmin = 10, water=FALSE, in.shade=FALSE, x){
   if(!water){
-    soil.temps <- micro.output$soil[x, 4:12] # soil temperatures from 2.5cm to 2m
+    if(!in.shade){
+      soil.temps <- micro.output$soil[x, 4:12] # soil temperatures from 2.5cm to 2m
+    } else {
+      soil.temps <- micro.output$shadsoil[x, 4:12] # soil temperatures from 2.5cm to 2m
+    }
     # selects the shallowest node with temperatures between Tmax and Tmin
     sel.node <- which(soil.temps <= Tmax & soil.temps >= Tmin)[1]
     colnames(soil.temps)[sel.node]
   } else {
-    soil.temps <- micro.output$soil[x, 4:12] # soil temperatures from 2.5cm to 2m
-    soil.pots <- micro.output$soilpot[x, 4:12] # soil temperatures from 2.5cm to 2m
+    if(!in.shade){
+      soil.temps <- micro.output$soil[x, 4:12] # soil temperatures from 2.5cm to 2m
+      soil.pots <- micro.output$soilpot[x, 4:12] # soil temperatures from 2.5cm to 2m
+    } else {
+      soil.temps <- micro.output$shadsoil[x, 4:12] # soil temperatures from 2.5cm to 2m
+      soil.pots <- micro.output$shadpot[x, 4:12] # soil temperatures from 2.5cm to 2m
+    }
     # selects the shallowest node with water potential >= -72.5
     # and with temperatures between Tmax and Tmin
     sel.node <- which(soil.temps <= Tmax & soil.temps >= Tmin & soil.pots >= -72.5)[1]
@@ -104,14 +113,23 @@ seldep <- function(micro.output, Tmax = 30, Tmin = 10, water=FALSE, x){
 
 
 # set the environment given activity (TRUE = active above-ground; FALSE = below-ground)
-environment <- function(micro.output, activity, water=TRUE, x){
+environment <- function(micro.output, activity, Tmax = 30, Tmin = 10, water=TRUE, in.shade=FALSE, x){
   
-  soil <- micro.output$soil
+  if(!in.shade){
+    soil <- micro.output$soil
+  } else {
+    soil <- micro.output$shadsoil
+  }
+  
   
   if(activity){
     # above-ground
     dep <- "D0cm"
-    metout <- micro.output$metout
+    if(!in.shade){
+      metout <- micro.output$metout
+    } else {
+      metout <- micro.output$shadmet
+    }
     
     # get required inputs
     TA <- metout$TALOC[x]
@@ -123,7 +141,7 @@ environment <- function(micro.output, activity, water=TRUE, x){
   }
   else {
     # below-ground
-    dep <- seldep(micro.output, Tmax = 30, Tmin = 10, water=water, x)
+    dep <- seldep(micro.output, Tmax = Tmax, Tmin = Tmin, water=water, in.shade=in.shade, x)
     
     TA <- soil[,dep][x]
     TGRD <- TA
@@ -141,7 +159,7 @@ environment <- function(micro.output, activity, water=TRUE, x){
 
 
 # function to run ectotherm simulations
-sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, 
+sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade = FALSE,
                      min.hyd = 70, hyd.rate = 3, water = TRUE, water.act = TRUE,
                      Ww_g = 40,
                      shape = 4,
@@ -171,7 +189,7 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10,
     ACTs <- c(ACTs, act)
     
     if(act){
-      env <- environment(micro.output, act, water=water, x)
+      env <- environment(micro.output, act, Tmax = Tmax, Tmin = Tmin, water=water, in.shade=in.shade, x)
       DEPs <- c(DEPs, as.double(substr(env$dep, 2, nchar(env$dep)-2)))
       ecto <- ectoR_devel(Ww_g = Ww_g,
                           shape = shape,
@@ -201,7 +219,7 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10,
       }
       
       if(!(suit.therm) | !(suit.hydro)){
-        env <- environment(micro.output, water=water, act=FALSE, x)
+        env <- environment(micro.output, act=FALSE, Tmax = Tmax, Tmin = Tmin, water=water, in.shade=in.shade, x)
         DEPs <- c(DEPs, as.double(substr(env$dep, 2, nchar(env$dep)-2)))
         ecto <- ectoR_devel(Ww_g = Ww_g,
                             shape = shape,
@@ -234,7 +252,7 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10,
         TBs <- c(TBs, ecto$TC)
       }
     } else {
-      env <- environment(micro.output, water=water, act=act, x)
+      env <- environment(micro.output, act=act, Tmax = Tmax, Tmin = Tmin, water=water, in.shade=in.shade, x)
       DEPs <- c(DEPs, as.double(substr(env$dep, 2, nchar(env$dep)-2)))
       ecto <- ectoR_devel(Ww_g = Ww_g,
                           shape = shape,

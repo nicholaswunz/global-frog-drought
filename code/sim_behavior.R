@@ -18,6 +18,9 @@ micro <- micro_global_drought(loc=longlat, rainfact = 0.80, rhfact = 0.90,
 
 # set parameter values
 
+Ww_g = 40
+shape = 4
+pct_wet = 80
 Tmax = 30 # maximum temperature for activity
 Tmin = 10 # minimum temperature for activity
 min.hyd = 80 # minimum hydration percentage
@@ -28,17 +31,21 @@ hyd.rate = 3 # maximum rehydration rate
 # water; does the frog select depth according to water potential? (TRUE or FALSE)
 # water.act; does the activity depend on water loss? (TRUE or FALSE)
 
-sim.res <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, 
-                    min.hyd = min.hyd, hyd.rate = hyd.rate, water = FALSE, water.act = FALSE)
+sim.res <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, in.shade = TRUE,
+                    min.hyd = min.hyd, hyd.rate = hyd.rate, water = FALSE, water.act = FALSE, 
+                    Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
 
-sim.res.waterdep <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, 
-                             min.hyd = min.hyd, hyd.rate = hyd.rate, water = TRUE, water.act = FALSE)
+sim.res.waterdep <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, in.shade = TRUE,
+                             min.hyd = min.hyd, hyd.rate = hyd.rate, water = TRUE, water.act = FALSE,
+                             Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
 
-sim.res.wateract <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, 
-                             min.hyd = min.hyd, hyd.rate = hyd.rate, water = FALSE, water.act = TRUE)
+sim.res.wateract <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, in.shade = TRUE,
+                             min.hyd = min.hyd, hyd.rate = hyd.rate, water = FALSE, water.act = TRUE,
+                             Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
 
-sim.res.wateract.waterdep <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, 
-                                      min.hyd = min.hyd, hyd.rate = hyd.rate, water = TRUE, water.act = TRUE)
+sim.res.wateract.waterdep <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, in.shade = TRUE,
+                                      min.hyd = min.hyd, hyd.rate = hyd.rate, water = TRUE, water.act = TRUE,
+                                      Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
 
 # water = FALSE, water.act = FALSE
 plot(sim.res$TBs, type='l')
@@ -79,11 +86,13 @@ sum(sim.res.wateract.waterdep$act) /2
 
 
 # compare to the ectotherm model in NicheMapR with similar behavior
+
 ecto_nmr <- ectotherm(Ww_g = 40, shape = 4, M_1 = 0, M_2 = 0, M_3 = 0,
           postur = 0, pantmax = 0, pct_cond = 40, pct_wet = 80, # 0.01
           CT_min = 10, T_RB_min = 10, T_B_min = 10, T_F_min = 10,
           T_pref = 25, T_F_max = 30, CT_max = 30,
-          diurn = 0, nocturn = 1, crepus = 0, shade_seek = 0)
+          diurn = 0, nocturn = 1, crepus = 0, shade_seek = 0,
+          shdburrow = 2, minshades = micro$minshade)
 
 environ <- data.frame(ecto_nmr$environ)
 
