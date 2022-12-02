@@ -251,7 +251,7 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
           env <- environment(micro.output, act=FALSE, Tmax = Tmax, Tmin = Tmin, 
                              water=water, in.shade=in.shade,
                              burrow=burrow, climb=climb, x)
-          DEPs <- c(DEPs, as.double(substr(env$dep, 2, nchar(env$dep)-2)))
+          DEPs[x] <- as.double(substr(env$dep, 2, nchar(env$dep)-2))
           ecto <- ectoR_devel(Ww_g = Ww_g,
                               shape = shape,
                               alpha = alpha,
@@ -283,7 +283,7 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
           env <- environment(micro.output, act=act, Tmax = Tmax, Tmin = Tmin, 
                              water=water, in.shade=in.shade,
                              burrow=burrow, climb=climb, x)
-          DEPs <- c(DEPs, as.double(substr(env$dep, 2, nchar(env$dep)-2)))
+          DEPs[x] <- as.double(substr(env$dep, 2, nchar(env$dep)-2))
           ecto <- ectoR_devel(Ww_g = Ww_g,
                               shape = shape,
                               alpha = alpha,
@@ -315,7 +315,7 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
             env <- environment(micro.output, act=FALSE, Tmax = Tmax, Tmin = Tmin, 
                                water=water, in.shade=in.shade,
                                burrow=burrow, climb=FALSE, x)
-            DEPs <- c(DEPs, as.double(substr(env$dep, 2, nchar(env$dep)-2)))
+            DEPs[x] <- as.double(substr(env$dep, 2, nchar(env$dep)-2))
             ecto <- ectoR_devel(Ww_g = Ww_g,
                                 shape = shape,
                                 alpha = alpha,
