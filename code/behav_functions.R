@@ -20,6 +20,25 @@ retrieve.output <- function(micro){
 }
 
 
+# function to plot activity windows
+plot.act <- function(sim.res, micro){
+  require(ggplot2)
+  dt <- micro$metout[,1]
+  h <- rep(1:24, time=micro$ndays)
+  act.dt <- data.frame(cbind(dt, h))
+  colnames(act.dt) <- c('date','hour')
+  act.dt$state <- NA
+  for(i in 1:nrow(act.dt)){
+    act.dt$state[i] <- ifelse(sim.res$act[i], 1, 0)
+    act.dt$state[i] <- ifelse(sim.res$climb[i], 2, act.dt$state[i])
+  }
+  ggplot(act.dt) +
+    geom_raster(aes(x=date, y=hour, fill=as.factor(state))) +
+    scale_fill_manual(name = "Activity levels", 
+                      values=c("#031c3b","#88db11","#db5711"),
+                      labels=c("sheltered (inactive)","aboveground (active)","climbing (active)"))
+}
+
 
 # function to define when an animal will be active
 activity <- function(micro.output, behav=c('diurnal', 'nocturnal', 'both'), Z=Z){

@@ -31,25 +31,31 @@ hyd.rate = 3 # maximum rehydration rate
 # water; does the frog select depth according to water potential? (TRUE or FALSE)
 # water.act; does the activity depend on water loss? (TRUE or FALSE)
 
-sim.res <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
+sim.res <- sim.ecto(micro, behav = 'diurnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
                     min.hyd = min.hyd, hyd.rate = hyd.rate, water = FALSE, water.act = FALSE,
                     burrow = TRUE, climb = TRUE,
                     Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
 
-sim.res.waterdep <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
+sim.res.waterdep <- sim.ecto(micro, behav = 'diurnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
                              min.hyd = min.hyd, hyd.rate = hyd.rate, water = TRUE, water.act = FALSE,
                              burrow = TRUE, climb = TRUE,
                              Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
 
-sim.res.wateract <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
+sim.res.wateract <- sim.ecto(micro, behav = 'diurnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
                              min.hyd = min.hyd, hyd.rate = hyd.rate, water = FALSE, water.act = TRUE,
                              burrow = TRUE, climb = TRUE,
                              Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
 
-sim.res.wateract.waterdep <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
+sim.res.wateract.waterdep <- sim.ecto(micro, behav = 'diurnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
                                       min.hyd = min.hyd, hyd.rate = hyd.rate, water = TRUE, water.act = TRUE,
                                       burrow = TRUE, climb = TRUE,
                                       Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
+
+# plot activity window plots
+plot.act(sim.res, micro)
+plot.act(sim.res.waterdep, micro)
+plot.act(sim.res.wateract, micro)
+plot.act(sim.res.wateract.waterdep, micro)
 
 # water = FALSE, water.act = FALSE
 plot(sim.res$TBs, type='l', xlab='Time (h)', ylab='Body temperature (ºC)')
