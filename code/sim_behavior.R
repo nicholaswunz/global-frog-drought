@@ -33,47 +33,52 @@ hyd.rate = 3 # maximum rehydration rate
 
 sim.res <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
                     min.hyd = min.hyd, hyd.rate = hyd.rate, water = FALSE, water.act = FALSE,
-                    burrow = TRUE, climb = FALSE,
+                    burrow = TRUE, climb = TRUE,
                     Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
 
 sim.res.waterdep <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
                              min.hyd = min.hyd, hyd.rate = hyd.rate, water = TRUE, water.act = FALSE,
-                             burrow = TRUE, climb = FALSE,
+                             burrow = TRUE, climb = TRUE,
                              Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
 
 sim.res.wateract <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
                              min.hyd = min.hyd, hyd.rate = hyd.rate, water = FALSE, water.act = TRUE,
-                             burrow = TRUE, climb = FALSE,
+                             burrow = TRUE, climb = TRUE,
                              Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
 
 sim.res.wateract.waterdep <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
                                       min.hyd = min.hyd, hyd.rate = hyd.rate, water = TRUE, water.act = TRUE,
-                                      burrow = TRUE, climb = FALSE,
+                                      burrow = TRUE, climb = TRUE,
                                       Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
 
 # water = FALSE, water.act = FALSE
-plot(sim.res$TBs, type='l')
-plot(sim.res$hydration, type='l')
-plot(sim.res$act, type='l')
-plot(-sim.res$dep, type='l')
+plot(sim.res$TBs, type='l', xlab='Time (h)', ylab='Body temperature (ºC)')
+plot(sim.res$hydration, type='l', xlab='Time (h)', ylab='Hydration (% of max hydration)')
+plot(sim.res$act, xlab='Time (h)', ylab='Activity')
+plot(sim.res$climb, xlab='Time (h)', ylab='Climbing')
+plot(-sim.res$dep, type='l', xlab='Time (h)', ylab='Selected vertical position (cm)')
 
 # water = TRUE, water.act = FALSE
-plot(sim.res.waterdep$TBs, type='l')
-plot(sim.res.waterdep$hydration, type='l')
-plot(sim.res.waterdep$act, type='l')
-plot(-sim.res.waterdep$dep, type='l')
+plot(sim.res.waterdep$TBs, type='l', xlab='Time (h)', ylab='Body temperature (ºC)')
+plot(sim.res.waterdep$hydration, type='l', xlab='Time (h)', ylab='Hydration (% of max hydration)')
+plot(sim.res.waterdep$act, xlab='Time (h)', ylab='Activity')
+plot(sim.res.waterdep$climb, xlab='Time (h)', ylab='Climbing')
+plot(-sim.res.waterdep$dep, type='l', xlab='Time (h)', ylab='Selected vertical position (cm)')
 
 # water = FALSE, water.act = TRUE
 plot(sim.res.wateract$TBs, type='l')
-plot(sim.res.wateract$hydration, type='l')
-plot(sim.res.wateract$act, type='l')
-plot(-sim.res.wateract$dep, type='l')
+plot(sim.res.wateract$TBs, type='l', xlab='Time (h)', ylab='Body temperature (ºC)')
+plot(sim.res.wateract$hydration, type='l', xlab='Time (h)', ylab='Hydration (% of max hydration)')
+plot(sim.res.wateract$act, xlab='Time (h)', ylab='Activity')
+plot(sim.res.wateract$climb, xlab='Time (h)', ylab='Climbing')
+plot(-sim.res.wateract$dep, type='l', xlab='Time (h)', ylab='Selected vertical position (cm)')
 
 # water = TRUE, water.act = TRUE
-plot(sim.res.wateract.waterdep$TBs, type='l')
-plot(sim.res.wateract.waterdep$hydration, type='l')
-plot(sim.res.wateract.waterdep$act, type='l')
-plot(-sim.res.wateract.waterdep$dep, type='l')
+plot(sim.res.wateract.waterdep$TBs, type='l', xlab='Time (h)', ylab='Body temperature (ºC)')
+plot(sim.res.wateract.waterdep$hydration, type='l', xlab='Time (h)', ylab='Hydration (% of max hydration)')
+plot(sim.res.wateract.waterdep$act, xlab='Time (h)', ylab='Activity')
+plot(sim.res.wateract.waterdep$climb, xlab='Time (h)', ylab='Climbing')
+plot(-sim.res.wateract.waterdep$dep, type='l', xlab='Time (h)', ylab='Selected vertical position (cm)')
 
 
 range(sim.res$hydration)
@@ -90,7 +95,7 @@ sum(sim.res.wateract.waterdep$act) /2
 
 
 # compare to the ectotherm model in NicheMapR with similar behavior
-sim.res <- sim.ecto(micro, behav = 'diurnal', Tmax = Tmax, Tmin = Tmin, in.shade = TRUE,
+sim.res <- sim.ecto(micro, behav = 'nocturnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
                     min.hyd = min.hyd, hyd.rate = hyd.rate, water = FALSE, water.act = FALSE,
                     burrow = TRUE, climb = FALSE,
                     Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
@@ -99,15 +104,18 @@ ecto_nmr <- ectotherm(Ww_g = 40, shape = 4, M_1 = 0, M_2 = 0, M_3 = 0,
           postur = 0, pantmax = 0, pct_cond = 40, pct_wet = 80, # 0.01
           CT_min = 10, T_RB_min = 10, T_B_min = 10, T_F_min = 10,
           T_pref = 30, T_F_max = 30, CT_max = 30,
-          diurn = 1, nocturn = 0, crepus = 0, shade_seek = 0, burrow=1,
-          shdburrow = 2, minshades = micro$maxshade)
+          diurn = 0, nocturn = 1, crepus = 0, shade_seek = 0, burrow=1,
+          shdburrow = 0, minshades = micro$minshade)
 
 environ <- data.frame(ecto_nmr$environ)
 
 
 with(environ, plot(TC, type='l'))
 with(sim.res, points(TBs, type='l', col='red'))
-with(environ, points(TC, type='l'))
+
+with(environ, plot(DEP, type='l'))
+with(sim.res, points(-dep, type='l', col='red'))
+
 # R is much slower than fortran
 # but out results are equivalent to NicheMapR
 

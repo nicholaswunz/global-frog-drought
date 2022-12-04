@@ -201,18 +201,20 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
   
   micro.output <- retrieve.output(micro)
   
-  hyd <- Ww_g * 70/100 # water content ob body in grams
+  hyd <- Ww_g * 70/100 # water content of body in grams
   min.water <- hyd * min.hyd/100
   
   hydration <- hyd # to stored hydration
   TBs <- c() # to store Tbs
   ACTs <- c() # to store activity (TRUE = active; FALSE = underground)
   DEPs <- c() # to store the depth if underground
+  climbing <- c()
   
   for(x in 1:(micro$ndays * 24)){ 
     zenith <- micro.output$metout$ZEN[x]
     act <- activity(micro.output, behav=behav, Z=zenith)
     ACTs <- c(ACTs, act)
+    climbing <- c(climbing, FALSE)
     
     if(act){
       env <- environment(micro.output, act, Tmax = Tmax, Tmin = Tmin, 
@@ -346,6 +348,7 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
           } else {
             hydration <- c(hydration, update.hyd(ecto, hydration[x], hyd))
             TBs <- c(TBs, ecto$TC)
+            climbing[x] <- climb
           }
           
         }
@@ -388,7 +391,8 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
     }
   }
   
-  return(list(hydration=hydration, TBs=TBs, act=ACTs, dep=DEPs))
+  hydration <- hydration * (100/hyd)
+  return(list(hydration=hydration, TBs=TBs, act=ACTs, dep=DEPs, climb=climbing))
   
 }
 
