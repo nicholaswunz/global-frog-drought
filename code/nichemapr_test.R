@@ -130,4 +130,112 @@ forage %>%
 
 forage$TIME
 unique(environ$DOY)
+
+
+## TEST SIMULATIONS - 06/12/2022 ## -------------------------------------------------------------------
+
+# Simulate rainfall with rhfact = 0.5 and rainfact = 0.54
+longlat    <- c(153.09249, -27.6235) # Karawatha, QLD.
+micro_curr_wet <- micro_global_drought(loc = longlat, timeinterval = 365, nyears = 1,
+                                       runmoist = T, runshade = T,
+                                       rhfact = 1, rainfact = 1,
+                                       warm = 0)
+
+# Construct frog model
+# compute the heat exchange by convection (extract mass transfer coefficient, Prandtl number and Schmidt number)
+CONV_out <- NicheMapR::CONV_ENDO(TS     = 19, # skin temperature (°C)
+                                 TENV   = 20, # fluid temperature (°C)
+                                 SHAPE  = 4, # 4 is ellipsoid
+                                 SURFAR = mean(resist_dat$dors_SA_cm2, na.rm = TRUE) / 10000,  # surface area for convection, m2
+                                 FLTYPE = 0, # fluid type: 0 = air
+                                 FURTST = 0, # test of presence of fur (length x diameter x density x depth) (-)
+                                 D      = mean(resist_dat$D, na.rm = TRUE), 
+                                 TFA    = 20, # initial fur/air interface temperature
+                                 VEL    = mean(resist_dat$airflow_cm_s, na.rm = TRUE) / 100, # wind speed (m/s)
+                                 ZFUR   = 0, # fur depth, mean (m)
+                                 BP     = 101325, # barometric pressure at sea level
+                                 ELEV   = 0) # elevation (m)
+
+# basic parameters for 30 g frog
+Ww_g         <- mean(raw_dat$mean_mass_g, na.rm = TRUE) # wet weight of animal (g)
+r_s_low      <- resist_dat %>% dplyr::filter(strategy == "none") %>% dplyr::select(unit_corrected_mean) # skin resistance
+pct_wet_high  <- 1 / (CONV_out[5] * mean(r_s_low$unit_corrected_mean) + (CONV_out[11] / CONV_out[13]) ^ 0.6666666) * 100  # % of surface area acting as a free-water exchanger (Pirtle et al 2017)
+
+# parameters for a water-proof frog
+r_s_high     <- resist_dat %>% dplyr::filter(strategy == "water-proof") %>% dplyr::select(unit_corrected_mean) # skin resistance
+pct_wet_low <- 1 / (CONV_out[5] * max(r_s_high$unit_corrected_mean) + (CONV_out[11] / CONV_out[13]) ^ 0.6666666) * 100 # % of surface area acting as a free-water exchanger (Pirtle et al 2017)
+
+# Thermal traits based on Rhinella marina
+Tmin   <- 13.7 # minimum Tb at which activity occurs (Kearney et al 2008)
+Tmax   <- 36.4 # maximum Tb at which activity occurs (Kearney et al 2008)
+T_pref <- 24 # preferred Tb (Kearney et al 2008)
+CT_max <- 40 # critical thermal minimum (affects choice of retreat) Tracy et al 2012
+CT_min <- 5 # critical thermal maximum (affects choice of retreat) Kolbe et al 2010, McCann et al 2014
+
+# Water balance traits
+min_hyd = 70 # minimum tolerated hydration before activity declines (% of fully hydrated animals)
+Cmin_hyd = 50 # minimum tolerated hydration before death (% of fully hydrated animals)
+wu_rate <- wu_dat %>% dplyr::filter(strategy == "none") %>% dplyr::select(mg_h_mean)
+hyd_rate <- mean(wu_rate$mg_h_mean, na.rm = TRUE) / 1000 # maximum rehydration rate (g/h)
+# depends on current and max hydration like this: hyd.rate * ((hyd - hyd.current) / hyd)
+
+# NULL MODEL - does not burrow or climb. Under sun condition only
+null_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4, Tmax = Tmax, Tmin = Tmin,
+                          behav = 'both', in.shade = FALSE, burrow = FALSE, climb = FALSE,
+                          min.hyd = min_hyd, hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
+                          water = FALSE, water.act = TRUE)
+
+# SHADE MODEL - does not burrow or climb. Under shade condition only
+shad_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4, Tmax = Tmax, Tmin = Tmin,
+                          behav = 'both', in.shade = TRUE, burrow = FALSE, climb = FALSE,
+                          min.hyd = min_hyd, hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
+                          water = FALSE, water.act = TRUE)
+
+# WATER-PROOF MODEL - climbs but does not burrow. Under shade condition only
+tree_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4, Tmax = Tmax, Tmin = Tmin,
+                          behav = 'both', in.shade = TRUE, burrow = FALSE, climb = TRUE,
+                          min.hyd = min_hyd, hyd.rate = hyd_rate, pct_wet = pct_wet_low, 
+                          water = TRUE, water.act = TRUE)
+
+# BURROWING MODEL - burrows but does not climb. Under shade condition only
+burr_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4, Tmax = Tmax, Tmin = Tmin,
+                          behav = 'both', in.shade = TRUE, burrow = TRUE, climb = FALSE,
+                          min.hyd = min_hyd, hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
+                          water = TRUE, water.act = TRUE)
+
+# Behaviour output
+null_active <- plot.act(null_curr_wet_mod, micro_curr_wet) + 
+  labs(x = "Day of the year", y = "Hour of the day") +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0)) + 
+  mytheme() + theme(legend.position = "bottom", legend.key.size = unit(2, 'mm'))
+
+shad_active <- plot.act(shad_curr_wet_mod, micro_curr_wet) + 
+  labs(x = "Day of the year", y = "Hour of the day") +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0)) + 
+  mytheme() + theme(legend.position = "bottom", legend.key.size = unit(2, 'mm'))
+
+tree_active <- plot.act(tree_curr_wet_mod, micro_curr_wet) + 
+  labs(x = "Day of the year", y = "Hour of the day") +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0)) + 
+  mytheme() + theme(legend.position = "bottom", legend.key.size = unit(2, 'mm'))
+
+burr_active <- plot.act(burr_curr_wet_mod, micro_curr_wet) + 
+  labs(x = "Day of the year", y = "Hour of the day") +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0)) + 
+  mytheme() + theme(legend.position = "bottom", legend.key.size = unit(2, 'mm'))
+
+prow <- cowplot::plot_grid(
+  null_active + theme(legend.position ="none"),
+  shad_active + theme(legend.position ="none"),
+  tree_active + theme(legend.positio ="none"),
+  burr_active + theme(legend.position ="none"),
+  ncol = 2, labels = c('a', 'b', 'c', 'd'))
+
+legend_b <- cowplot::get_legend(tree_active + guides(color = guide_legend(nrow = 1)))
+
+plot_grid(prow, legend_b, ncol = 1, rel_heights = c(1, .1))
              
