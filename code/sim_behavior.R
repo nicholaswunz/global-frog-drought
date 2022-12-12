@@ -21,35 +21,50 @@ micro <- micro_global_drought(loc=longlat, rainfact = 0.80, rhfact = 0.90,
 Ww_g = 40
 shape = 4
 pct_wet = 80
-Tmax = 30 # maximum temperature for activity
+Tmax = 25 # maximum temperature for activity
 Tmin = 10 # minimum temperature for activity
 min.hyd = 80 # minimum hydration percentage
 hyd.rate = 3 # maximum rehydration rate
 # depends on current and max hydration like this: hyd.rate * ((hyd - hyd.current) / hyd)
+CTmin = -2
+CTmax = 29 
+hyd.death = 50
 
 # behav = 'diurnal', 'nocturnal' or 'both'
 # water; does the frog select depth according to water potential? (TRUE or FALSE)
 # water.act; does the activity depend on water loss? (TRUE or FALSE)
+behav = 'both'
+in.shade = FALSE
+burrow = FALSE
+climb = FALSE
 
-sim.res <- sim.ecto(micro, behav = 'diurnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
-                    min.hyd = min.hyd, hyd.rate = hyd.rate, water = FALSE, water.act = FALSE,
-                    burrow = TRUE, climb = TRUE,
-                    Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
+sim.res <- sim.ecto(micro, behav = behav, Tmax = Tmax, Tmin = Tmin, in.shade = in.shade,
+                    min.hyd = min.hyd, hyd.rate = hyd.rate,
+                    CTmin = CTmin, CTmax = CTmax, hyd.death = hyd.death,
+                    burrow = burrow, climb = climb,
+                    Ww_g = Ww_g, shape = shape, pct_wet = pct_wet,
+                    water = FALSE, water.act = FALSE)
 
-sim.res.waterdep <- sim.ecto(micro, behav = 'diurnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
-                             min.hyd = min.hyd, hyd.rate = hyd.rate, water = TRUE, water.act = FALSE,
-                             burrow = TRUE, climb = TRUE,
-                             Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
+sim.res.waterdep <- sim.ecto(micro, behav = behav, Tmax = Tmax, Tmin = Tmin, in.shade = in.shade,
+                             min.hyd = min.hyd, hyd.rate = hyd.rate, 
+                             CTmin = CTmin, CTmax = CTmax, hyd.death = hyd.death,
+                             burrow = burrow, climb = climb,
+                             Ww_g = Ww_g, shape = shape, pct_wet = pct_wet,
+                             water = TRUE, water.act = FALSE)
 
-sim.res.wateract <- sim.ecto(micro, behav = 'diurnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
-                             min.hyd = min.hyd, hyd.rate = hyd.rate, water = FALSE, water.act = TRUE,
-                             burrow = TRUE, climb = TRUE,
-                             Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
+sim.res.wateract <- sim.ecto(micro, behav = behav, Tmax = Tmax, Tmin = Tmin, in.shade = in.shade,
+                             min.hyd = min.hyd, hyd.rate = hyd.rate, 
+                             CTmin = CTmin, CTmax = CTmax, hyd.death = hyd.death,
+                             burrow = burrow, climb = climb,
+                             Ww_g = Ww_g, shape = shape, pct_wet = pct_wet,
+                             water = FALSE, water.act = TRUE)
 
-sim.res.wateract.waterdep <- sim.ecto(micro, behav = 'diurnal', Tmax = Tmax, Tmin = Tmin, in.shade = FALSE,
-                                      min.hyd = min.hyd, hyd.rate = hyd.rate, water = TRUE, water.act = TRUE,
-                                      burrow = TRUE, climb = TRUE,
-                                      Ww_g = Ww_g, shape = shape, pct_wet = pct_wet)
+sim.res.wateract.waterdep <- sim.ecto(micro, behav = behav, Tmax = Tmax, Tmin = Tmin, in.shade = in.shade,
+                                      min.hyd = min.hyd, hyd.rate = hyd.rate, 
+                                      CTmin = CTmin, CTmax = CTmax, hyd.death = hyd.death,
+                                      burrow = burrow, climb = climb,
+                                      Ww_g = Ww_g, shape = shape, pct_wet = pct_wet,
+                                      water = TRUE, water.act = TRUE)
 
 # plot activity window plots
 plot.act(sim.res, micro)
@@ -60,6 +75,8 @@ plot.act(sim.res.wateract.waterdep, micro)
 # water = FALSE, water.act = FALSE
 plot(sim.res$TBs, type='l', xlab='Time (h)', ylab='Body temperature (ºC)')
 plot(sim.res$hydration, type='l', xlab='Time (h)', ylab='Hydration (% of max hydration)')
+plot(sim.res$T_tol, xlab='Time (h)', ylab='Thermal tolerance reached')
+plot(sim.res$H_tol, xlab='Time (h)', ylab='Hydric tolerance reached')
 plot(sim.res$act, xlab='Time (h)', ylab='Activity')
 plot(sim.res$climb, xlab='Time (h)', ylab='Climbing')
 plot(-sim.res$dep, type='l', xlab='Time (h)', ylab='Selected vertical position (cm)')
@@ -67,14 +84,17 @@ plot(-sim.res$dep, type='l', xlab='Time (h)', ylab='Selected vertical position (
 # water = TRUE, water.act = FALSE
 plot(sim.res.waterdep$TBs, type='l', xlab='Time (h)', ylab='Body temperature (ºC)')
 plot(sim.res.waterdep$hydration, type='l', xlab='Time (h)', ylab='Hydration (% of max hydration)')
+plot(sim.res.waterdep$T_tol, xlab='Time (h)', ylab='Thermal tolerance reached')
+plot(sim.res.waterdep$H_tol, xlab='Time (h)', ylab='Hydric tolerance reached')
 plot(sim.res.waterdep$act, xlab='Time (h)', ylab='Activity')
 plot(sim.res.waterdep$climb, xlab='Time (h)', ylab='Climbing')
 plot(-sim.res.waterdep$dep, type='l', xlab='Time (h)', ylab='Selected vertical position (cm)')
 
 # water = FALSE, water.act = TRUE
-plot(sim.res.wateract$TBs, type='l')
 plot(sim.res.wateract$TBs, type='l', xlab='Time (h)', ylab='Body temperature (ºC)')
 plot(sim.res.wateract$hydration, type='l', xlab='Time (h)', ylab='Hydration (% of max hydration)')
+plot(sim.res.wateract$T_tol, xlab='Time (h)', ylab='Thermal tolerance reached')
+plot(sim.res.wateract$H_tol, xlab='Time (h)', ylab='Hydric tolerance reached')
 plot(sim.res.wateract$act, xlab='Time (h)', ylab='Activity')
 plot(sim.res.wateract$climb, xlab='Time (h)', ylab='Climbing')
 plot(-sim.res.wateract$dep, type='l', xlab='Time (h)', ylab='Selected vertical position (cm)')
@@ -82,6 +102,8 @@ plot(-sim.res.wateract$dep, type='l', xlab='Time (h)', ylab='Selected vertical p
 # water = TRUE, water.act = TRUE
 plot(sim.res.wateract.waterdep$TBs, type='l', xlab='Time (h)', ylab='Body temperature (ºC)')
 plot(sim.res.wateract.waterdep$hydration, type='l', xlab='Time (h)', ylab='Hydration (% of max hydration)')
+plot(sim.res.wateract.waterdep$T_tol, xlab='Time (h)', ylab='Thermal tolerance reached')
+plot(sim.res.wateract.waterdep$H_tol, xlab='Time (h)', ylab='Hydric tolerance reached')
 plot(sim.res.wateract.waterdep$act, xlab='Time (h)', ylab='Activity')
 plot(sim.res.wateract.waterdep$climb, xlab='Time (h)', ylab='Climbing')
 plot(-sim.res.wateract.waterdep$dep, type='l', xlab='Time (h)', ylab='Selected vertical position (cm)')

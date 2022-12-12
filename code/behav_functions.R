@@ -28,15 +28,29 @@ plot.act <- function(sim.res, micro){
   act.dt <- data.frame(cbind(dt, h))
   colnames(act.dt) <- c('date','hour')
   act.dt$state <- NA
+  act.dt$tol <- NA
   for(i in 1:nrow(act.dt)){
     act.dt$state[i] <- ifelse(sim.res$act[i], 1, 0)
     act.dt$state[i] <- ifelse(sim.res$climb[i], 2, act.dt$state[i])
+    act.dt$tol[i] <- ifelse(sim.res$T_tol[i], 1, 0)
+    if(sim.res$T_tol[i]){
+      act.dt$tol[i] <- ifelse(sim.res$H_tol[i], 3, act.dt$tol[i])
+    } else {
+      act.dt$tol[i] <- ifelse(sim.res$H_tol[i], 2, act.dt$tol[i]) 
+    }
   }
   ggplot(act.dt) +
     geom_raster(aes(x=date, y=hour, fill=as.factor(state))) +
+    geom_point(aes(x=date, y=hour, colour = factor(tol, levels=c('0', '1', '2', '3')),
+                   alpha = factor(tol, levels=c('0', '1', '2', '3'))), size=.5) +
+    scale_colour_manual(name = "Physiological tolerance", 
+                      values=c('white', 'red', 'darkblue', 'purple'),
+                      labels=c("Suitable", "T_tol reached", "H_tol reached", "Both"), drop = F) +
+    scale_alpha_manual(values = c(0, 1, 1, 1)) +
     scale_fill_manual(name = "Activity levels", 
                       values=c("#031c3b","#88db11","#db5711"),
-                      labels=c("sheltered (inactive)","aboveground (active)","climbing (active)"))
+                      labels=c("sheltered (inactive)","aboveground (active)","climbing (active)")) +
+    guides(alpha = "none")
 }
 
 
@@ -205,6 +219,7 @@ environment <- function(micro.output, activity=TRUE, Tmax = 30, Tmin = 10, water
 # function to run ectotherm simulations
 sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade = FALSE,
                      min.hyd = 70, hyd.rate = 3, water = TRUE, water.act = TRUE,
+                     CTmin = -2, CTmax = 37, hyd.death = 50,
                      burrow=TRUE, climb=FALSE,
                      Ww_g = 40,
                      shape = 4,
@@ -222,12 +237,15 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
   
   hyd <- Ww_g * 70/100 # water content of body in grams
   min.water <- hyd * min.hyd/100
+  death.water <- hyd * hyd.death/100
   
   hydration <- hyd # to stored hydration
   TBs <- c() # to store Tbs
   ACTs <- c() # to store activity (TRUE = active; FALSE = underground)
   DEPs <- c() # to store the depth if underground
   climbing <- c()
+  T_tol <- c()
+  H_tol <- c()
   
   for(x in 1:(micro$ndays * 24)){ 
     zenith <- micro.output$metout$ZEN[x]
@@ -300,6 +318,8 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
                                               x = x))
           TBs <- c(TBs, ecto$TC)
           ACTs[x] <- (suit.therm) & (suit.hydro)
+          T_tol <- c(T_tol, ifelse(TBs[x] <= CTmin | TBs[x] >= CTmax, TRUE, FALSE))
+          H_tol <- c(H_tol, ifelse(hydration[x+1] <= death.water, TRUE, FALSE))
         } else {
           env <- environment(micro.output, act=act, Tmax = Tmax, Tmin = Tmin, 
                              water=water, in.shade=in.shade,
@@ -363,10 +383,14 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
                                                 hyd.rate=hyd.rate, 
                                                 x = x))
             TBs <- c(TBs, ecto$TC)
+            T_tol <- c(T_tol, ifelse(TBs[x] <= CTmin | TBs[x] >= CTmax, TRUE, FALSE))
+            H_tol <- c(H_tol, ifelse(hydration[x+1] <= death.water, TRUE, FALSE))
             ACTs[x] <- (suit.therm) & (suit.hydro)
           } else {
             hydration <- c(hydration, update.hyd(ecto, hydration[x], hyd))
             TBs <- c(TBs, ecto$TC)
+            T_tol <- c(T_tol, ifelse(TBs[x] <= CTmin | TBs[x] >= CTmax, TRUE, FALSE))
+            H_tol <- c(H_tol, ifelse(hydration[x+1] <= death.water, TRUE, FALSE))
             climbing[x] <- climb
           }
           
@@ -375,6 +399,8 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
       } else {
         hydration <- c(hydration, update.hyd(ecto, hydration[x], hyd))
         TBs <- c(TBs, ecto$TC)
+        T_tol <- c(T_tol, ifelse(TBs[x] <= CTmin | TBs[x] >= CTmax, TRUE, FALSE))
+        H_tol <- c(H_tol, ifelse(hydration[x+1] <= death.water, TRUE, FALSE))
       }
     } else {
       env <- environment(micro.output, act=act, Tmax = Tmax, Tmin = Tmin, 
@@ -407,11 +433,13 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
                                           hyd.rate=hyd.rate, 
                                           x = x))
       TBs <- c(TBs, ecto$TC)
+      T_tol <- c(T_tol, ifelse(TBs[x] <= CTmin | TBs[x] >= CTmax, TRUE, FALSE))
+      H_tol <- c(H_tol, ifelse(hydration[x+1] <= death.water, TRUE, FALSE))
     }
   }
   
   hydration <- hydration * (100/hyd)
-  return(list(hydration=hydration, TBs=TBs, act=ACTs, dep=DEPs, climb=climbing))
+  return(list(hydration=hydration, TBs=TBs, act=ACTs, dep=DEPs, climb=climbing, T_tol=T_tol, H_tol=H_tol))
   
 }
 
