@@ -132,13 +132,18 @@ forage$TIME
 unique(environ$DOY)
 
 
-## TEST SIMULATIONS - 06/12/2022 ## -------------------------------------------------------------------
+## TEST SIMULATIONS - 15/12/2022 ## -------------------------------------------------------------------
 
 # Simulate rainfall with rhfact = 0.5 and rainfact = 0.54
 longlat    <- c(153.09249, -27.6235) # Karawatha, QLD.
 micro_curr_wet <- micro_global_drought(loc = longlat, timeinterval = 365, nyears = 1,
                                        runmoist = T, runshade = T,
                                        rhfact = 1, rainfact = 1,
+                                       warm = 0)
+
+micro_curr_dry <- micro_global_drought(loc = longlat, timeinterval = 365, nyears = 1,
+                                       runmoist = T, runshade = T,
+                                       rhfact = 0.5, rainfact = 0.54,
                                        warm = 0)
 
 # Construct frog model
@@ -169,39 +174,58 @@ pct_wet_low <- 1 / (CONV_out[5] * max(r_s_high$unit_corrected_mean) + (CONV_out[
 Tmin   <- 13.7 # minimum Tb at which activity occurs (Kearney et al 2008)
 Tmax   <- 36.4 # maximum Tb at which activity occurs (Kearney et al 2008)
 T_pref <- 24 # preferred Tb (Kearney et al 2008)
-CT_max <- 40 # critical thermal minimum (affects choice of retreat) Tracy et al 2012
-CT_min <- 5 # critical thermal maximum (affects choice of retreat) Kolbe et al 2010, McCann et al 2014
+CTmax  <- 40 # critical thermal minimum (affects choice of retreat) Tracy et al 2012
+CTmin  <- 5 # critical thermal maximum (affects choice of retreat) Kolbe et al 2010, McCann et al 2014
 
 # Water balance traits
-min_hyd = 70 # minimum tolerated hydration before activity declines (% of fully hydrated animals)
-Cmin_hyd = 50 # minimum tolerated hydration before death (% of fully hydrated animals)
+min_hyd <- 70 # minimum tolerated hydration before activity declines (% of fully hydrated animals)
+hyd.death <- 50 # minimum tolerated hydration before death (% of fully hydrated animals)
 wu_rate <- wu_dat %>% dplyr::filter(strategy == "none") %>% dplyr::select(mg_h_mean)
 hyd_rate <- mean(wu_rate$mg_h_mean, na.rm = TRUE) / 1000 # maximum rehydration rate (g/h)
 # depends on current and max hydration like this: hyd.rate * ((hyd - hyd.current) / hyd)
 
 # NULL MODEL - does not burrow or climb. Under sun condition only
-null_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4, Tmax = Tmax, Tmin = Tmin,
-                          behav = 'both', in.shade = FALSE, burrow = FALSE, climb = FALSE,
-                          min.hyd = min_hyd, hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
-                          water = FALSE, water.act = TRUE)
+null_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4, 
+                              Tmax = Tmax, Tmin = Tmin, CTmin = CTmin, CTmax = CTmax,
+                              behav = 'both', in.shade = FALSE, burrow = FALSE, climb = FALSE,
+                              min.hyd = min_hyd, hyd.death = hyd.death,
+                              hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
+                              water = FALSE, water.act = FALSE)
+
+null_curr_dry_mod <- sim.ecto(micro_curr_dry, Ww_g = Ww_g, shape = 4, 
+                              Tmax = Tmax, Tmin = Tmin, CTmin = CTmin, CTmax = CTmax,
+                              behav = 'both', in.shade = FALSE, burrow = FALSE, climb = FALSE,
+                              min.hyd = min_hyd, hyd.death = hyd.death,
+                              hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
+                              water = FALSE, water.act = FALSE)
 
 # SHADE MODEL - does not burrow or climb. Under shade condition only
-shad_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4, Tmax = Tmax, Tmin = Tmin,
-                          behav = 'both', in.shade = TRUE, burrow = FALSE, climb = FALSE,
-                          min.hyd = min_hyd, hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
-                          water = FALSE, water.act = TRUE)
+shad_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4, 
+                              Tmax = Tmax, Tmin = Tmin, CTmin = CTmin, CTmax = CTmax,
+                              behav = 'both', in.shade = TRUE, burrow = FALSE, climb = FALSE,
+                              min.hyd = min_hyd, hyd.death = hyd.death,
+                              hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
+                              water = FALSE, water.act = TRUE)
 
 # WATER-PROOF MODEL - climbs but does not burrow. Under shade condition only
-tree_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4, Tmax = Tmax, Tmin = Tmin,
-                          behav = 'both', in.shade = TRUE, burrow = FALSE, climb = TRUE,
-                          min.hyd = min_hyd, hyd.rate = hyd_rate, pct_wet = pct_wet_low, 
-                          water = TRUE, water.act = TRUE)
+tree_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4, 
+                              Tmax = Tmax, Tmin = Tmin, CTmin = CTmin, CTmax = CTmax,
+                              behav = 'both', in.shade = TRUE, burrow = FALSE, climb = TRUE,
+                              min.hyd = min_hyd, hyd.death = hyd.death,
+                              hyd.rate = hyd_rate, pct_wet = pct_wet_low, 
+                              water = TRUE, water.act = TRUE)
 
 # BURROWING MODEL - burrows but does not climb. Under shade condition only
-burr_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4, Tmax = Tmax, Tmin = Tmin,
-                          behav = 'both', in.shade = TRUE, burrow = TRUE, climb = FALSE,
-                          min.hyd = min_hyd, hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
-                          water = TRUE, water.act = TRUE)
+burr_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4, 
+                              Tmax = Tmax, Tmin = Tmin, CTmin = CTmin, CTmax = CTmax,
+                              behav = 'both', in.shade = TRUE, burrow = TRUE, climb = FALSE,
+                              min.hyd = min_hyd, hyd.death = hyd.death,
+                              hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
+                              water = TRUE, water.act = TRUE)
+
+## Ask Urtzi to check ##
+plot(null_curr_wet_mod$hydration, type='l', xlab='Time (h)', ylab='Hydration (%)')
+plot(null_curr_dry_mod$hydration, type='l', xlab='Time (h)', ylab='Hydration (%)') # the dry model is showing more hydration?
 
 # Behaviour output
 null_active <- plot.act(null_curr_wet_mod, micro_curr_wet) + 
