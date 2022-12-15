@@ -224,8 +224,11 @@ burr_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4,
                               water = TRUE, water.act = TRUE)
 
 ## Ask Urtzi to check ##
-plot(null_curr_wet_mod$hydration, type='l', xlab='Time (h)', ylab='Hydration (%)')
-plot(null_curr_dry_mod$hydration, type='l', xlab='Time (h)', ylab='Hydration (%)') # the dry model is showing more hydration?
+plot.act(null_curr_wet_mod, micro_curr_wet) + ggtitle("null model - wet")
+plot.act(null_curr_dry_mod, micro_curr_dry) + ggtitle("null model - dry")
+
+plot(null_curr_wet_mod$hydration, type='l', xlab='Time (h)', ylab='Hydration (%)', main = 'null model - wet')
+plot(null_curr_dry_mod$hydration, type='l', xlab='Time (h)', ylab='Hydration (%)', main = 'null model - dry')  # the dry model is showing more hydration?
 
 # Behaviour output
 null_active <- plot.act(null_curr_wet_mod, micro_curr_wet) + 
