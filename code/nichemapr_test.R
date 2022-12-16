@@ -2,7 +2,7 @@ library(NicheMapR)
 library(tidyverse)
 
 # Load data
-raw_dat <- read.csv("raw_data.csv") %>%
+raw_dat <- read.csv("../data/raw_data.csv") %>%
   dplyr::select(study_ID:unit) %>%
   dplyr::mutate(strategy = factor(case_when(strategy == "" ~ "none", TRUE ~ as.character(strategy))),
                 strategy = fct_relevel(strategy, "none", "water-proof", "cocoon", "hollow"))
@@ -235,6 +235,21 @@ burr_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4,
 ## Ask Urtzi to check ##
 plot.act(null_curr_wet_mod, micro_curr_wet) + ggtitle("null model - wet")
 plot.act(null_curr_dry_mod, micro_curr_dry) + ggtitle("null model - dry")
+
+sum(null_curr_wet_mod$act) # 5410 h ~ 225 days
+sum(null_curr_dry_mod$act) # 3374 h ~ 141 days
+
+plot(null_curr_wet_mod$TBs, type='l', xlab='Time (h)', ylab='Body temperature (ºC)', ylim=c(0,30))
+points(null_curr_dry_mod$TBs, type='l', xlab='Time (h)', ylab='Body temperature (ºC)', col='red')
+
+m_wet <- retrieve.output(micro_curr_wet)
+m_dry <- retrieve.output(micro_curr_dry)
+plot(m_wet$metout$TALOC, type='l', xlab='Time (h)', ylab='Body temperature (ºC)', ylim=c(2,40))
+points(m_dry$metout$TALOC, type='l', xlab='Time (h)', ylab='Body temperature (ºC)', col='red')
+
+plot(m_wet$metout$RHLOC, type='l', xlab='Time (h)', ylab='Body temperature (ºC)', ylim=c(0,100))
+points(m_dry$metout$RHLOC, type='l', xlab='Time (h)', ylab='Body temperature (ºC)', col='red')
+
 
 plot(null_curr_wet_mod$hydration, type='l', xlab='Time (h)', ylab='Hydration (%)', main = 'null model - wet')
 plot(null_curr_dry_mod$hydration, type='l', xlab='Time (h)', ylab='Hydration (%)', main = 'null model - dry')  # the dry model is showing more hydration?
