@@ -10,6 +10,15 @@ raw_dat <- read.csv("raw_data.csv") %>%
 resist_dat <- raw_dat %>%
   dplyr::filter(unit == "s cm")
 
+wu_dat <- raw_dat %>%
+  filter(response == "water uptake") %>%
+  dplyr::mutate(mg_h_mean = unit_corrected_mean * vent_SA_cm2,
+                mg_h_sd   = unit_corrected_sd * vent_SA_cm2,
+                lnMean    = log(mg_h_mean),
+                es_v      = mg_h_sd^2 / sample_size, # sampling variance (v)
+                es_sei    = sqrt(es_v), # standard error (SE)
+                es_inv    = 1 / es_sei) # precision (inverse of SE)
+
 # Frog model
 # computes the heat exchange by convection (extract mass transfer coefficient, Prandtl number and Schmidt number)
 CONV_out <- NicheMapR::CONV_ENDO(TS     = 19, # skin temperature (°C)
