@@ -30,7 +30,7 @@ mytheme <- function() {
 setwd('/Users/nicholaswu/Library/CloudStorage/OneDrive-WesternSydneyUniversity/Drought project') 
 
 # Load and clean raw data
-raw_dat <- read.csv("raw_data.csv") %>%
+raw_dat <- read.csv("../data/raw_data.csv") %>%
   dplyr::select(study_ID:unit) %>%
   mutate(ecotype  = factor(ecotype),
          family   = factor(family),
@@ -151,28 +151,28 @@ null_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4,
                               behav = 'both', in.shade = FALSE, burrow = FALSE, climb = FALSE,
                               min.hyd = min_hyd, hyd.death = hyd.death,
                               hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
-                              water = FALSE, water.act = FALSE)
+                              water = FALSE, water.act = TRUE)
 
 null_curr_dry_mod <- sim.ecto(micro_curr_dry, Ww_g = Ww_g, shape = 4, 
                               Tmax = Tmax, Tmin = Tmin, CTmin = CTmin, CTmax = CTmax,
                               behav = 'both', in.shade = FALSE, burrow = FALSE, climb = FALSE,
                               min.hyd = min_hyd, hyd.death = hyd.death,
                               hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
-                              water = FALSE, water.act = FALSE)
+                              water = FALSE, water.act = TRUE)
 
 null_warm_wet_mod <- sim.ecto(micro_warm_wet, Ww_g = Ww_g, shape = 4, 
                               Tmax = Tmax, Tmin = Tmin, CTmin = CTmin, CTmax = CTmax,
                               behav = 'both', in.shade = FALSE, burrow = FALSE, climb = FALSE,
                               min.hyd = min_hyd, hyd.death = hyd.death,
                               hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
-                              water = FALSE, water.act = FALSE)
+                              water = FALSE, water.act = TRUE)
 
 null_warm_dry_mod <- sim.ecto(micro_warm_dry, Ww_g = Ww_g, shape = 4, 
                               Tmax = Tmax, Tmin = Tmin, CTmin = CTmin, CTmax = CTmax,
                               behav = 'both', in.shade = FALSE, burrow = FALSE, climb = FALSE,
                               min.hyd = min_hyd, hyd.death = hyd.death,
                               hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
-                              water = FALSE, water.act = FALSE)
+                              water = FALSE, water.act = TRUE)
 
 # SHADE MODEL
 shad_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4, 
@@ -301,55 +301,31 @@ plot_grid(prow, legend_b, ncol = 1, rel_heights = c(1, .1))
 # sum activity when active = TRUE, between T_tol, above H_tol, and hydrat <70.
 
 # NULL MODEL
-null_curr_wet_df <- data.frame(null_curr_wet_mod$act, null_curr_wet_mod$T_tol, null_curr_wet_mod$H_tol, null_curr_wet_mod$hydration[-1]) %>%
+null_curr_wet_df <- data.frame(null_curr_wet_mod$act) %>%
   tibble::rowid_to_column("hour") %>%
-  dplyr::rename(active = null_curr_wet_mod.act,
-                t_lim  = null_curr_wet_mod.T_tol,
-                h_lim  = null_curr_wet_mod.H_tol,
-                hydrat = null_curr_wet_mod.hydration..1.) %>%
-  dplyr::mutate(day = ceiling(1:8760/24),
-                active = ifelse(t_lim == "TRUE","FALSE", "TRUE"),
-                active = ifelse(h_lim == "TRUE","FALSE", "TRUE"),
-                active = ifelse(hydrat < 70, "FALSE", "TRUE")) %>%
+  dplyr::rename(active = null_curr_wet_mod.act) %>%
+  dplyr::mutate(day = ceiling(1:8760/24)) %>%
   dplyr::group_by(day) %>%
   dplyr::summarise(curr_wet = length(active[active == TRUE]))
 
-null_curr_dry_df <- data.frame(null_curr_dry_mod$act, null_curr_dry_mod$T_tol, null_curr_dry_mod$H_tol, null_curr_dry_mod$hydration[-1]) %>%
+null_curr_dry_df <- data.frame(null_curr_dry_mod$act) %>%
   tibble::rowid_to_column("hour") %>%
-  dplyr::rename(active = null_curr_dry_mod.act,
-                t_lim  = null_curr_dry_mod.T_tol,
-                h_lim  = null_curr_dry_mod.H_tol,
-                hydrat = null_curr_dry_mod.hydration..1.) %>%
-  dplyr::mutate(day = ceiling(1:8760/24),
-                active = ifelse(t_lim == "TRUE","FALSE", "TRUE"),
-                active = ifelse(h_lim == "TRUE","FALSE", "TRUE"),
-                active = ifelse(hydrat < 70, "FALSE", "TRUE")) %>%
+  dplyr::rename(active = null_curr_dry_mod.act) %>%
+  dplyr::mutate(day = ceiling(1:8760/24)) %>%
   dplyr::group_by(day) %>%
   dplyr::summarise(curr_dry = length(active[active == TRUE]))
 
-null_warm_wet_df <- data.frame(null_warm_wet_mod$act, null_warm_wet_mod$T_tol, null_warm_wet_mod$H_tol, null_warm_wet_mod$hydration[-1]) %>%
+null_warm_wet_df <- data.frame(null_warm_wet_mod$act) %>%
   tibble::rowid_to_column("hour") %>%
-  dplyr::rename(active = null_warm_wet_mod.act,
-                t_lim  = null_warm_wet_mod.T_tol,
-                h_lim  = null_warm_wet_mod.H_tol,
-                hydrat = null_warm_wet_mod.hydration..1.) %>%
-  dplyr::mutate(day = ceiling(1:8760/24),
-                active = ifelse(t_lim == "TRUE","FALSE", "TRUE"),
-                active = ifelse(h_lim == "TRUE","FALSE", "TRUE"),
-                active = ifelse(hydrat < 70, "FALSE", "TRUE")) %>%
+  dplyr::rename(active = null_warm_wet_mod.act) %>%
+  dplyr::mutate(day = ceiling(1:8760/24)) %>%
   dplyr::group_by(day) %>%
   dplyr::summarise(warm_wet = length(active[active == TRUE]))
 
-null_warm_dry_df <- data.frame(null_warm_dry_mod$act, null_warm_dry_mod$T_tol, null_warm_dry_mod$H_tol, null_warm_dry_mod$hydration[-1]) %>%
+null_warm_dry_df <- data.frame(null_warm_dry_mod$act) %>%
   tibble::rowid_to_column("hour") %>%
-  dplyr::rename(active = null_warm_dry_mod.act,
-                t_lim  = null_warm_dry_mod.T_tol,
-                h_lim  = null_warm_dry_mod.H_tol,
-                hydrat = null_warm_dry_mod.hydration..1.) %>%
-  dplyr::mutate(day = ceiling(1:8760/24),
-                active = ifelse(t_lim == "TRUE","FALSE", "TRUE"),
-                active = ifelse(h_lim == "TRUE","FALSE", "TRUE"),
-                active = ifelse(hydrat < 70, "FALSE", "TRUE")) %>%
+  dplyr::rename(active = null_warm_dry_mod.act) %>%
+  dplyr::mutate(day = ceiling(1:8760/24)) %>%
   dplyr::group_by(day) %>%
   dplyr::summarise(warm_dry = length(active[active == TRUE]))
 
