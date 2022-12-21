@@ -21,7 +21,7 @@ This repository contains code and data needed to reproduce the article:
 - TerraClimate19812010_ppt.nc - A NetCDF file of yearly global precipitation (1981-2010) from [TerraClimate](https://www.climatologylab.org/terraclimate.html).
 - TerraClimate19812010_pet.nc - A NetCDF file of yearly global evapotranspiration (1981-2010) from [TerraClimate](https://www.climatologylab.org/terraclimate.html).
 - TerraClimate4C_ppt.nc - A NetCDF file of yearly global precipitation (+4°C) from [TerraClimate](https://www.climatologylab.org/terraclimate.html).
-- TerraClimate4C_pet.nc - - A NetCDF file of yearly global evapotranspiration (+4°C) from [TerraClimate](https://www.climatologylab.org/terraclimate.html).
+- TerraClimate4C_pet.nc - A NetCDF file of yearly global evapotranspiration (+4°C) from [TerraClimate](https://www.climatologylab.org/terraclimate.html).
 - pdsi-2100-ssp5-85.nc - A NetCDF file of yearly self-calibrated Palmer drought severity index with Penman–Monteith potential evapotranspiration from 25 CMIP6 models in [Zhao and Dai (2022)](https://journals.ametsoc.org/view/journals/clim/35/3/JCLI-D-21-0442.1.xml).
   
 
