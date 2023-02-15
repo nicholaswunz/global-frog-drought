@@ -20,10 +20,14 @@ This repository contains code and data needed to reproduce the article:
 - ANURA.shp - Shape file of anuran native distribution downloaded on the 08/01/2020 from the International Union for Conservation of Nature Red List of Threatened Species ([IUCN Red List](https://www.iucnredlist.org/resources/spatial-data-download)).
 - TerraClimate19812010_ppt.nc - A NetCDF file of yearly global precipitation (1981-2010) from [TerraClimate](https://www.climatologylab.org/terraclimate.html).
 - TerraClimate19812010_pet.nc - A NetCDF file of yearly global evapotranspiration (1981-2010) from [TerraClimate](https://www.climatologylab.org/terraclimate.html).
-- TerraClimate4C_ppt.nc - A NetCDF file of yearly global precipitation (+4°C) from [TerraClimate](https://www.climatologylab.org/terraclimate.html).
+- TerraClimate19812010_vpd.nc - A NetCDF file of yearly global vapour pressure deficiet (1981-2010) from [TerraClimate](https://www.climatologylab.org/terraclimate.html).
+- TerraClimate19812010_ws.nc - A NetCDF file of yearly global wind speed (1981-2010) from [TerraClimate](https://www.climatologylab.org/terraclimate.html).
+- TerraClimate2C_ppt.nc - A NetCDF file of yearly global precipitation (+2°C) from [TerraClimate](https://www.climatologylab.org/terraclimate.html).
+- TerraClimate2C_pet.nc - A NetCDF file of yearly global evapotranspiration (+2°C) from [TerraClimate](https://www.climatologylab.org/terraclimate.html).
+- TerraClimate2C_ppt.nc - A NetCDF file of yearly global precipitation (+4°C) from [TerraClimate](https://www.climatologylab.org/terraclimate.html).
 - TerraClimate4C_pet.nc - A NetCDF file of yearly global evapotranspiration (+4°C) from [TerraClimate](https://www.climatologylab.org/terraclimate.html).
-- pdsi-2100-ssp5-85.nc - A NetCDF file of yearly self-calibrated Palmer drought severity index with Penman–Monteith potential evapotranspiration from 25 CMIP6 models in [Zhao and Dai (2022)](https://journals.ametsoc.org/view/journals/clim/35/3/JCLI-D-21-0442.1.xml).
-  
+- pdsisc.monthly.1900-2100.r2.5x2.5.EnsAvg25Models.TP2.ipe-2.ssp245.nc - A NetCDF file of yearly self-calibrated Palmer drought severity index with Penman–Monteith potential evapotranspiration from 25 CMIP6 models under a SSP2-4.5 scenario in [Zhao and Dai (2022)](https://journals.ametsoc.org/view/journals/clim/35/3/JCLI-D-21-0442.1.xml).
+- pdsisc.monthly.1900-2100.r2.5x2.5.EnsAvg25Models.TP2.ipe-2.ssp585.nc - A NetCDF file of yearly self-calibrated Palmer drought severity index with Penman–Monteith potential evapotranspiration from 25 CMIP6 models under a SSP5-8.5 scenario in [Zhao and Dai (2022)](https://journals.ametsoc.org/view/journals/clim/35/3/JCLI-D-21-0442.1.xml).
 
 ## Abstract
 Maintaining water balance is a critical attribute influencing the resilience of organisms to climate extremes such as drought events. The risk of drought may also be mediated by ecological types, or ecotype that differ in their microhabitat preference and dependence on water, and thus their physiological niche. Using anurans, a data-rich taxonomic group, we identified regions of exposure risk to increase aridity and drought, and examined which ecotypes were most sensitive to desiccation using biophysical simulations to quantify changes in activity in relation to climate change. Under a business-as-usual scenario, we show that ~24% of areas occupied by anurans will increase to arid-like conditions, and 38% of areas will be at risk of drought...
