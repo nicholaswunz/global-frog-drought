@@ -67,6 +67,19 @@ activity <- function(micro.output, behav=c('diurnal', 'nocturnal', 'both'), Z=Z)
   }
 }
 
+# for era5: function to define when an animal will be active
+activity2 <- function(micro.output, behav=c('diurnal', 'nocturnal', 'both'), Z=Z){
+  if(!(behav %in% c('diurnal', 'nocturnal', 'both'))){
+    stop('Behavior has to be \'diurnal\', \'nocturnal\', or \'both\'')
+  }
+  if(behav == 'diurnal' & Z == 90 |
+     behav == 'nocturnal' & Z < 90){
+    TRUE
+  } else {
+    FALSE    
+  }
+}
+
 
 # activity based on thermal range
 thermal.range <- function(ecto, Tmax=30, Tmin=10){
@@ -217,7 +230,8 @@ environment <- function(micro.output, activity=TRUE, Tmax = 30, Tmin = 10, water
 
 
 # function to run ectotherm simulations
-sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade = FALSE,
+sim.ecto <- function(micro, behav = 'nocturnal', micro_func = "global",
+                     Tmax = 30, Tmin = 10, in.shade = FALSE,
                      min.hyd = 70, hyd.rate = 3, water = TRUE, water.act = TRUE,
                      CTmin = -2, CTmax = 37, hyd.death = 50,
                      burrow=TRUE, climb=FALSE,
@@ -249,7 +263,12 @@ sim.ecto <- function(micro, behav = 'nocturnal', Tmax = 30, Tmin = 10, in.shade 
   
   for(x in 1:(micro$ndays * 24)){ 
     zenith <- micro.output$metout$ZEN[x]
-    act <- activity(micro.output, behav=behav, Z=zenith)
+    if(micro_func == "global"){
+      act <- activity(micro.output, behav=behav, Z=zenith)
+    }
+    if(micro_func == "era5"){
+      act <- activity2(micro.output, behav=behav, Z=zenith)
+    }
     ACTs <- c(ACTs, act)
     climbing <- c(climbing, FALSE)
     

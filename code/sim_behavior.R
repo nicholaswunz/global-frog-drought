@@ -1,5 +1,5 @@
 
-setwd('~/Dropbox/1_papers/collaborations/Niky Wu/global-frog-drought/code/')
+setwd('~/Dropbox/4-collaborations/1-papers/Niky Wu/global-frog-drought/code/')
 
 rm(list=ls())
 
@@ -33,33 +33,37 @@ hyd.death = 50
 # behav = 'diurnal', 'nocturnal' or 'both'
 # water; does the frog select depth according to water potential? (TRUE or FALSE)
 # water.act; does the activity depend on water loss? (TRUE or FALSE)
-behav = 'both'
+behav = 'diurnal'
 in.shade = FALSE
 burrow = FALSE
 climb = FALSE
 
-sim.res <- sim.ecto(micro, behav = behav, Tmax = Tmax, Tmin = Tmin, in.shade = in.shade,
+sim.res <- sim.ecto(micro, behav = behav, micro_func = "global",
+                    Tmax = Tmax, Tmin = Tmin, in.shade = in.shade,
                     min.hyd = min.hyd, hyd.rate = hyd.rate,
                     CTmin = CTmin, CTmax = CTmax, hyd.death = hyd.death,
                     burrow = burrow, climb = climb,
                     Ww_g = Ww_g, shape = shape, pct_wet = pct_wet,
                     water = FALSE, water.act = FALSE)
 
-sim.res.waterdep <- sim.ecto(micro, behav = behav, Tmax = Tmax, Tmin = Tmin, in.shade = in.shade,
+sim.res.waterdep <- sim.ecto(micro, behav = behav, micro_func = "global",
+                             Tmax = Tmax, Tmin = Tmin, in.shade = in.shade,
                              min.hyd = min.hyd, hyd.rate = hyd.rate, 
                              CTmin = CTmin, CTmax = CTmax, hyd.death = hyd.death,
                              burrow = burrow, climb = climb,
                              Ww_g = Ww_g, shape = shape, pct_wet = pct_wet,
                              water = TRUE, water.act = FALSE)
 
-sim.res.wateract <- sim.ecto(micro, behav = behav, Tmax = Tmax, Tmin = Tmin, in.shade = in.shade,
+sim.res.wateract <- sim.ecto(micro, behav = behav, micro_func = "global",
+                             Tmax = Tmax, Tmin = Tmin, in.shade = in.shade,
                              min.hyd = min.hyd, hyd.rate = hyd.rate, 
                              CTmin = CTmin, CTmax = CTmax, hyd.death = hyd.death,
                              burrow = burrow, climb = climb,
                              Ww_g = Ww_g, shape = shape, pct_wet = pct_wet,
                              water = FALSE, water.act = TRUE)
 
-sim.res.wateract.waterdep <- sim.ecto(micro, behav = behav, Tmax = Tmax, Tmin = Tmin, in.shade = in.shade,
+sim.res.wateract.waterdep <- sim.ecto(micro, behav = behav, micro_func = "global",
+                                      Tmax = Tmax, Tmin = Tmin, in.shade = in.shade,
                                       min.hyd = min.hyd, hyd.rate = hyd.rate, 
                                       CTmin = CTmin, CTmax = CTmax, hyd.death = hyd.death,
                                       burrow = burrow, climb = climb,
