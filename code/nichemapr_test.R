@@ -199,7 +199,7 @@ null_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4,
                               behav = 'both', in.shade = FALSE, burrow = FALSE, climb = FALSE,
                               min.hyd = min_hyd, hyd.death = hyd.death,
                               hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
-                              water = FALSE, water.act = FALSE)
+                              water = FALSE, water.act = TRUE)
 
 null_curr_dry_mod <- sim.ecto(micro_curr_dry, Ww_g = Ww_g, shape = 4, 
                               Tmax = Tmax, Tmin = Tmin, CTmin = CTmin, CTmax = CTmax,

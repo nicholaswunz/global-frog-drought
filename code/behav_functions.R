@@ -31,6 +31,9 @@ plot.act <- function(sim.res, micro){
   act.dt$tol <- NA
   for(i in 1:nrow(act.dt)){
     act.dt$state[i] <- ifelse(sim.res$act[i], 1, 0)
+    if(!sim.res$act[i]){
+      act.dt$state[i] <- ifelse(sim.res$H_suit[i], 0, 3)
+    }
     act.dt$state[i] <- ifelse(sim.res$climb[i], 2, act.dt$state[i])
     act.dt$tol[i] <- ifelse(sim.res$T_tol[i], 1, 0)
     if(sim.res$T_tol[i]){
@@ -40,7 +43,7 @@ plot.act <- function(sim.res, micro){
     }
   }
   ggplot(act.dt) +
-    geom_raster(aes(x=date, y=hour, fill=as.factor(state))) +
+    geom_raster(aes(x=date, y=hour, fill=factor(state, levels=c('0', '1', '2', '3')))) +
     geom_point(aes(x=date, y=hour, colour = factor(tol, levels=c('0', '1', '2', '3')),
                    alpha = factor(tol, levels=c('0', '1', '2', '3'))), size=.5) +
     scale_colour_manual(name = "Physiological tolerance", 
@@ -48,8 +51,11 @@ plot.act <- function(sim.res, micro){
                       labels=c("Suitable", "T_tol reached", "H_tol reached", "Both"), drop = F) +
     scale_alpha_manual(values = c(0, 1, 1, 1)) +
     scale_fill_manual(name = "Activity levels", 
-                      values=c("#031c3b","#88db11","#db5711"),
-                      labels=c("sheltered (inactive)","aboveground (active)","climbing (active)")) +
+                      values=c("#031c3b","#88db11","#db5711","#5811db"),
+                      labels=c("sheltered (inactive)","aboveground (active)","climbing (active)","hydration not suitable (inactive)")) +
+    # scale_fill_manual(name = "Activity levels", 
+    #                   values=c("#031c3b","#88db11","#db5711"),
+    #                   labels=c("sheltered (inactive)","aboveground (active)","climbing (active)")) +
     guides(alpha = "none")
 }
 
@@ -260,6 +266,7 @@ sim.ecto <- function(micro, behav = 'nocturnal', micro_func = "global",
   climbing <- c()
   T_tol <- c()
   H_tol <- c()
+  H_suit <- c()
   
   for(x in 1:(micro$ndays * 24)){ 
     zenith <- micro.output$metout$ZEN[x]
@@ -339,6 +346,7 @@ sim.ecto <- function(micro, behav = 'nocturnal', micro_func = "global",
           ACTs[x] <- (suit.therm) & (suit.hydro)
           T_tol <- c(T_tol, ifelse(TBs[x] <= CTmin | TBs[x] >= CTmax, TRUE, FALSE))
           H_tol <- c(H_tol, ifelse(hydration[x+1] <= death.water, TRUE, FALSE))
+          H_suit <- c(H_suit, suit.hydro)
         } else {
           env <- environment(micro.output, act=act, Tmax = Tmax, Tmin = Tmin, 
                              water=water, in.shade=in.shade,
@@ -404,12 +412,14 @@ sim.ecto <- function(micro, behav = 'nocturnal', micro_func = "global",
             TBs <- c(TBs, ecto$TC)
             T_tol <- c(T_tol, ifelse(TBs[x] <= CTmin | TBs[x] >= CTmax, TRUE, FALSE))
             H_tol <- c(H_tol, ifelse(hydration[x+1] <= death.water, TRUE, FALSE))
+            H_suit <- c(H_suit, suit.hydro)
             ACTs[x] <- (suit.therm) & (suit.hydro)
           } else {
             hydration <- c(hydration, update.hyd(ecto, hydration[x], hyd))
             TBs <- c(TBs, ecto$TC)
             T_tol <- c(T_tol, ifelse(TBs[x] <= CTmin | TBs[x] >= CTmax, TRUE, FALSE))
             H_tol <- c(H_tol, ifelse(hydration[x+1] <= death.water, TRUE, FALSE))
+            H_suit <- c(H_suit, suit.hydro)
             climbing[x] <- climb
           }
           
@@ -420,6 +430,7 @@ sim.ecto <- function(micro, behav = 'nocturnal', micro_func = "global",
         TBs <- c(TBs, ecto$TC)
         T_tol <- c(T_tol, ifelse(TBs[x] <= CTmin | TBs[x] >= CTmax, TRUE, FALSE))
         H_tol <- c(H_tol, ifelse(hydration[x+1] <= death.water, TRUE, FALSE))
+        H_suit <- c(H_suit, suit.hydro)
       }
     } else {
       env <- environment(micro.output, act=act, Tmax = Tmax, Tmin = Tmin, 
@@ -454,11 +465,12 @@ sim.ecto <- function(micro, behav = 'nocturnal', micro_func = "global",
       TBs <- c(TBs, ecto$TC)
       T_tol <- c(T_tol, ifelse(TBs[x] <= CTmin | TBs[x] >= CTmax, TRUE, FALSE))
       H_tol <- c(H_tol, ifelse(hydration[x+1] <= death.water, TRUE, FALSE))
+      H_suit <- c(H_suit, suit.hydro)
     }
   }
   
   hydration <- hydration * (100/hyd)
-  return(list(hydration=hydration, TBs=TBs, act=ACTs, dep=DEPs, climb=climbing, T_tol=T_tol, H_tol=H_tol))
+  return(list(hydration=hydration, TBs=TBs, act=ACTs, dep=DEPs, climb=climbing, T_tol=T_tol, H_tol=H_tol, H_suit=H_suit))
   
 }
 
