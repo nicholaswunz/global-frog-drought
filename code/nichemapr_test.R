@@ -171,26 +171,26 @@ CONV_out <- NicheMapR::CONV_ENDO(TS     = 19, # skin temperature (°C)
                                  ELEV   = 0) # elevation (m)
 
 # basic parameters for 30 g frog
-Ww_g         <- mean(raw_dat$mean_mass_g, na.rm = TRUE) # wet weight of animal (g)
+Ww_g         <- exp(mean(log(raw_dat$mean_mass_g), na.rm = TRUE)) # geometric mean wet weight of animal (g), account for uneven distribution
 r_s_low      <- resist_dat %>% dplyr::filter(strategy == "none") %>% dplyr::select(unit_corrected_mean) # skin resistance
-pct_wet_high  <- 1 / (CONV_out[5] * mean(r_s_low$unit_corrected_mean) + (CONV_out[11] / CONV_out[13]) ^ 0.6666666) * 100  # % of surface area acting as a free-water exchanger (Pirtle et al 2017)
+pct_wet_high <- 1 / (CONV_out[5] * mean(r_s_low$unit_corrected_mean) + (CONV_out[11] / CONV_out[13]) ^ 0.6666666) * 100  # % of surface area acting as a free-water exchanger (Pirtle et al 2017)
 
 # parameters for a water-proof frog
-r_s_high     <- resist_dat %>% dplyr::filter(strategy == "water-proof") %>% dplyr::select(unit_corrected_mean) # skin resistance
+r_s_high    <- resist_dat %>% dplyr::filter(strategy == "water-proof") %>% dplyr::select(unit_corrected_mean) # skin resistance
 pct_wet_low <- 1 / (CONV_out[5] * max(r_s_high$unit_corrected_mean) + (CONV_out[11] / CONV_out[13]) ^ 0.6666666) * 100 # % of surface area acting as a free-water exchanger (Pirtle et al 2017)
 
 # Thermal traits based on Rhinella marina
 Tmin   <- 13.7 # minimum Tb at which activity occurs (Kearney et al 2008)
 Tmax   <- 36.4 # maximum Tb at which activity occurs (Kearney et al 2008)
-T_pref <- 24 # preferred Tb (Kearney et al 2008)
+#T_pref <- 24 # preferred Tb (Kearney et al 2008)
 CTmax  <- 40 # critical thermal minimum (affects choice of retreat) Tracy et al 2012
 CTmin  <- 5 # critical thermal maximum (affects choice of retreat) Kolbe et al 2010, McCann et al 2014
 
 # Water balance traits
-min_hyd <- 70 # minimum tolerated hydration before activity declines (% of fully hydrated animals)
+min_hyd <- 80 # minimum tolerated hydration before activity declines (% of fully hydrated animals)
 hyd.death <- 50 # minimum tolerated hydration before death (% of fully hydrated animals)
 wu_rate <- wu_dat %>% dplyr::filter(strategy == "none") %>% dplyr::select(mg_h_mean)
-hyd_rate <- mean(wu_rate$mg_h_mean, na.rm = TRUE) / 1000 # maximum rehydration rate (g/h)
+hyd_rate <- exp(mean(log(wu_rate$mg_h_mean), na.rm = TRUE)) / 1000 # geometric mean rehydration rate (g/h), account for uneven distribution
 # depends on current and max hydration like this: hyd.rate * ((hyd - hyd.current) / hyd)
 
 # NULL MODEL - does not burrow or climb. Under sun condition only
@@ -289,4 +289,58 @@ prow <- cowplot::plot_grid(
 legend_b <- cowplot::get_legend(tree_active + guides(color = guide_legend(nrow = 1)))
 
 plot_grid(prow, legend_b, ncol = 1, rel_heights = c(1, .1))
-             
+
+
+
+## TEST SIMULATIONS - WU - 06/12/2023 ## -------------------------------------------------------------------
+longlat    <- c(153.09249, -27.6235) # Karawatha, QLD.
+
+# Null normal 2017 scenario - no shade
+micro_null_wet <- micro_era5(loc = longlat, 
+                             runshade = 0, minshade = 0, maxshade = 0.1, # shade parameters
+                             rainfact = 1.2, rhfact = 1, # rain and RH parameters
+                             warm = 0, # current climate
+                             dstart = "01/01/2017", 
+                             dfinish = "31/12/2017",
+                             spatial = '/Users/nicholaswu/Library/CloudStorage/OneDrive-WesternSydneyUniversity/Drought project/Spatial data/Karawatha/era5', # change to your location
+                             save = 0)
+
+# Current normal 2017 scenario
+micro_curr_wet <- micro_era5(loc = longlat, 
+                             runshade = 1, minshade = 0, # shade parameters
+                             rainfact = 1.2, rhfact = 1, # rain and RH parameters
+                             warm = 0, # current climate
+                             dstart = "01/01/2017", 
+                             dfinish = "31/12/2017",
+                             spatial = '/Users/nicholaswu/Library/CloudStorage/OneDrive-WesternSydneyUniversity/Drought project/Spatial data/Karawatha/era5', # change to your location
+                             save = 0)
+
+# Visualise soil moisture
+par(mfrow=c(2,1))
+plot(data.frame(micro_null_wet$soilmoist)$WC0cm, type = "l") # Both soilmoist the same 
+plot(data.frame(micro_curr_wet$soilmoist)$WC0cm, type = "l")
+plot(data.frame(micro_null_wet$shadmoist)$WC0cm, type = "l") # No shade
+plot(data.frame(micro_curr_wet$shadmoist)$WC0cm, type = "l")
+
+# NULL ECTO MODEL - No shade
+# does not seek shade, water, burrow or climb
+null_curr_wet_mod <- sim.ecto(micro_null_wet, Ww_g = Ww_g, shape = 4, 
+                              Tmax = Tmax, Tmin = Tmin, CTmin = CTmin, CTmax = CTmax,
+                              behav = 'both', in.shade = FALSE, burrow = FALSE, climb = FALSE,
+                              min.hyd = min_hyd, hyd.death = hyd.death,
+                              hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
+                              water = FALSE, water.act = TRUE)
+
+# does seek shade and water. Does not climb or burrow.
+shad_curr_wet_mod <- sim.ecto(micro_curr_wet, Ww_g = Ww_g, shape = 4, 
+                              Tmax = Tmax, Tmin = Tmin, CTmin = CTmin, CTmax = CTmax,
+                              behav = 'both', in.shade = TRUE, burrow = FALSE, climb = FALSE,
+                              min.hyd = min_hyd, hyd.death = hyd.death,
+                              hyd.rate = hyd_rate, pct_wet = pct_wet_high, 
+                              water = FALSE, water.act = TRUE)
+
+par(mfrow=c(2,1))
+plot(null_curr_wet_mod$hydration, type='l', xlab='Time (h)', ylab = '% of max hydration')
+plot(shad_curr_wet_mod$hydration, type='l', xlab='Time (h)', ylab = '% of max hydration') # Why us the ecot model with shade have lower hydration?
+
+
