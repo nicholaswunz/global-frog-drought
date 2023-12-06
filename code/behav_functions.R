@@ -32,7 +32,7 @@ plot.act <- function(sim.res, micro){
   for(i in 1:nrow(act.dt)){
     act.dt$state[i] <- ifelse(sim.res$act[i], 1, 0)
     if(!sim.res$act[i]){
-      act.dt$state[i] <- ifelse(sim.res$H_limiting[i], 0, 3)
+      act.dt$state[i] <- ifelse(sim.res$H_lim[i], 0, 3)
     }
     act.dt$state[i] <- ifelse(sim.res$climb[i], 2, act.dt$state[i])
     act.dt$tol[i] <- ifelse(sim.res$T_tol[i], 1, 0)
@@ -266,7 +266,7 @@ sim.ecto <- function(micro, behav = 'nocturnal', micro_func = "global",
   climbing <- c()
   T_tol <- c()
   H_tol <- c()
-  H_limiting <- c()
+  H_lim <- c()
   
   for(x in 1:(micro$ndays * 24)){ 
     zenith <- micro.output$metout$ZEN[x]
@@ -346,7 +346,7 @@ sim.ecto <- function(micro, behav = 'nocturnal', micro_func = "global",
           ACTs[x] <- (suit.therm) & (suit.hydro)
           T_tol <- c(T_tol, ifelse(TBs[x] <= CTmin | TBs[x] >= CTmax, TRUE, FALSE))
           H_tol <- c(H_tol, ifelse(hydration[x+1] <= death.water, TRUE, FALSE))
-          H_limiting <- c(H_limiting, (suit.therm) & (!suit.hydro))
+          H_lim <- c(H_lim, (suit.therm) & (!suit.hydro))
         } else {
           env <- environment(micro.output, act=act, Tmax = Tmax, Tmin = Tmin, 
                              water=water, in.shade=in.shade,
@@ -412,14 +412,14 @@ sim.ecto <- function(micro, behav = 'nocturnal', micro_func = "global",
             TBs <- c(TBs, ecto$TC)
             T_tol <- c(T_tol, ifelse(TBs[x] <= CTmin | TBs[x] >= CTmax, TRUE, FALSE))
             H_tol <- c(H_tol, ifelse(hydration[x+1] <= death.water, TRUE, FALSE))
-            H_limiting <- c(H_limiting, (suit.therm) & (!suit.hydro))
+            H_lim <- c(H_lim, (suit.therm) & (!suit.hydro))
             ACTs[x] <- (suit.therm) & (suit.hydro)
           } else {
             hydration <- c(hydration, update.hyd(ecto, hydration[x], hyd))
             TBs <- c(TBs, ecto$TC)
             T_tol <- c(T_tol, ifelse(TBs[x] <= CTmin | TBs[x] >= CTmax, TRUE, FALSE))
             H_tol <- c(H_tol, ifelse(hydration[x+1] <= death.water, TRUE, FALSE))
-            H_limiting <- c(H_limiting, (suit.therm) & (!suit.hydro))
+            H_lim <- c(H_lim, (suit.therm) & (!suit.hydro))
             climbing[x] <- climb
           }
           
@@ -430,7 +430,7 @@ sim.ecto <- function(micro, behav = 'nocturnal', micro_func = "global",
         TBs <- c(TBs, ecto$TC)
         T_tol <- c(T_tol, ifelse(TBs[x] <= CTmin | TBs[x] >= CTmax, TRUE, FALSE))
         H_tol <- c(H_tol, ifelse(hydration[x+1] <= death.water, TRUE, FALSE))
-        H_limiting <- c(H_limiting, (suit.therm) & (!suit.hydro))
+        H_lim <- c(H_lim, (suit.therm) & (!suit.hydro))
       }
     } else {
       env <- environment(micro.output, act=act, Tmax = Tmax, Tmin = Tmin, 
@@ -465,12 +465,12 @@ sim.ecto <- function(micro, behav = 'nocturnal', micro_func = "global",
       TBs <- c(TBs, ecto$TC)
       T_tol <- c(T_tol, ifelse(TBs[x] <= CTmin | TBs[x] >= CTmax, TRUE, FALSE))
       H_tol <- c(H_tol, ifelse(hydration[x+1] <= death.water, TRUE, FALSE))
-      H_limiting <- c(H_limiting, NA)
+      H_lim <- c(H_lim, NA)
     }
   }
   
   hydration <- hydration * (100/hyd)
-  return(list(hydration=hydration, TBs=TBs, act=ACTs, dep=DEPs, climb=climbing, T_tol=T_tol, H_tol=H_tol, H_limiting=H_limiting))
+  return(list(hydration=hydration, TBs=TBs, act=ACTs, dep=DEPs, climb=climbing, T_tol=T_tol, H_tol=H_tol, H_lim=H_lim))
   
 }
 
