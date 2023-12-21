@@ -8,6 +8,12 @@ This repository contains code and data needed to reproduce the article:
 
 **Wu N. C., Bovo, R. P., Enriquez-Urzelai U., Clusella-Trullas S., Kearney, M. R., Navas C. A., & Kong J. D.** (In Prep) Widespread exposure risk of anurans to rising global dryness. *Journal name*, **xx**, xxx-xxx, DOI: 
 
+**Code**
+- behav_functions.R - Modified ectotherm function to estimate hydration, body temperature, activity, burrow depth, tree climbing height, thermal tolerance, hydration tolerance, and activity hydration limit.
+- micro_era5_drought.R - Modified micro_era5 function to incorporate changes in rainfall.
+- micro_global_drought.R - Modified micro_global function to incorporate changes in rainfall.
+- sim_behavior.R - Example workflow testing the 'behav_functions' and 'micro_global_drought' functions
+
 **Data**
 - anuran_species_list.csv - Species-specific ecotype data from the [IUCN Red List](https://www.iucnredlist.org/).
 - raw_data.csv  - Raw hydrological data obtained from the literature used for the analysis.
