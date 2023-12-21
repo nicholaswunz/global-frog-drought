@@ -6,10 +6,10 @@ Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)
 
 This repository contains code and data needed to reproduce the article:
 
-**Wu N. C., Enriquez-Urzelai U., Navas C. A., & Kong J. D.** (In Prep) Global vulnerability of anurans to drought and warming. *Journal name*, **xx**, xxx-xxx, DOI: 
+**Wu N. C., Bovo, R. P., Enriquez-Urzelai U., Clusella-Trullas S., Kearney, M. R., Navas C. A., & Kong J. D.** (In Prep) Widespread exposure risk of anurans to rising global dryness. *Journal name*, **xx**, xxx-xxx, DOI: 
 
 **Data**
-- anuran_species_list.csv - Species-specific data from the [IUCN Red List](https://www.iucnredlist.org/).
+- anuran_species_list.csv - Species-specific ecotype data from the [IUCN Red List](https://www.iucnredlist.org/).
 - raw_data.csv  - Raw hydrological data obtained from the literature used for the analysis.
 
 **Analysis workflow**
@@ -30,9 +30,10 @@ This repository contains code and data needed to reproduce the article:
 - pdsisc.monthly.1900-2100.r2.5x2.5.EnsAvg25Models.TP2.ipe-2.ssp585.nc - A NetCDF file of yearly self-calibrated Palmer drought severity index with Penman–Monteith potential evapotranspiration from 25 CMIP6 models under a SSP5-8.5 scenario in [Zhao and Dai (2022)](https://journals.ametsoc.org/view/journals/clim/35/3/JCLI-D-21-0442.1.xml).
 
 ## Abstract
-Maintaining water balance is a critical attribute influencing the resilience of organisms to climate extremes such as drought events. The risk of drought may also be mediated by ecological types, or ecotype that differ in their microhabitat preference and dependence on water, and thus their physiological niche. Using anurans, a data-rich taxonomic group, we identified regions of exposure risk to increase aridity and drought, and examined which ecotypes were most sensitive to desiccation using biophysical simulations to quantify changes in activity in relation to climate change. Under a business-as-usual scenario, we show that ~24% of areas occupied by anurans will increase to arid-like conditions, and 38% of areas will be at risk of drought...
+Species exposed to prolonged drying are at risk to population declines or extinctions. A key missing element for assessments of climate risk is the sensitivity of species to water loss and their microhabitat preference, or ecotype, as both dictate the risk of environmental drying. Here, we identified globally where water-sensitive ectotherms, i.e. anurans, are at risk to increasing aridity and drought, examined which ecotypes are more sensitive to water loss from 238 species, and showed how behavioural activity is impacted by future drought and warming scenarios through biophysical models. Under an intermediate and high emission scenario, 6.6 and 33.5% of areas occupied by anurans will increase to arid-like conditions, and 15.4 and 36.1% are at risk of exposure to a combination of increasing drought intensity, frequency, and duration by 2080¬–2100, respectively. Critically, ecotypes did not differ in the rate of water loss, and biophysical models showed that for a ground-dwelling frog during the warmest quarter, the combination of drought and warming reduced potential activity by 17.9% relative to the current conditions compared to warming alone which reduced potential activity by 8%. Our results exemplify the widespread exposure risk of environmental drying for anurans, posing a serious challenge for the lives of water-sensitive species beyond the effects of temperature alone.
 
-**Keywords:** amphibian decline, climate change, desiccation, hydroregulation, thermoregulation, macrophysiology
+
+**Keywords:** amphibian decline, climate change, dehydration, hydroregulation, thermoregulation, macrophysiology
 
 ## License
 This repository is provided by the authors under the MIT License ([MIT](http://opensource.org/licenses/MIT)).
