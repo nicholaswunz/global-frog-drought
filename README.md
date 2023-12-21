@@ -19,7 +19,7 @@ This repository contains code and data needed to reproduce the article:
 - raw_data.csv  - Raw hydrological data obtained from the literature used for the analysis.
 
 **Analysis workflow**
-- [supplementary_information.html](https://nicholaswunz.github.io/uv-meta-analysis/supplementary_information.html) - Supplementary information which contains the R workflow for processing and analysing the raw data, creating figures, and supplementary material for statistical outcomes, additional figures, and descriptions from the main document.
+- [supplementary_information.html](https://nicholaswunz.github.io/global-frog-drought/supplementary_information.html) - Supplementary information which contains the R workflow for processing and analysing the raw data, creating figures, and supplementary material for statistical outcomes, additional figures, and descriptions from the main document.
 
 **External files**
 - ne_50m_land.shp - World land polygon shape file (1:50m) from [Natural Earth](https://www.naturalearthdata.com/downloads/50m-physical-vectors/).
