@@ -10,8 +10,6 @@ This repository contains code and data needed to reproduce the article:
 
 **Code**
 - `behav_functions.R` - Modified ectotherm function to estimate hydration, body temperature, activity, burrow depth, tree climbing height, thermal tolerance, hydration tolerance, and activity hydration limit.
-- `micro_era5_drought.R` - Modified micro_era5 function to incorporate changes in rainfall.
-- `micro_global_drought.R` - Modified micro_global function to incorporate changes in rainfall.
 - `sim_behavior.R` - Example workflow testing the 'behav_functions' and 'micro_global_drought' functions
 
 **Data**
@@ -37,9 +35,11 @@ This repository contains code and data needed to reproduce the article:
 - `pdsisc.monthly.1900-2100.r2.5x2.5.EnsAvg25Models.TP2.ipe-2.ssp585.nc` - A NetCDF file of yearly self-calibrated Palmer drought severity index with Penman–Monteith potential evapotranspiration from 25 CMIP6 models under a SSP5-8.5 scenario in [Zhao and Dai (2022)](https://journals.ametsoc.org/view/journals/clim/35/3/JCLI-D-21-0442.1.xml).
 
 ## Abstract
-Species exposed to prolonged drying are at risk of population declines or extinctions. A key missing element for assessments of climate change risk is the sensitivity of species to water loss and their microhabitat preference, or ecotype, as both dictate the risk of environmental drying. Here, we identified globally where water-sensitive ectotherms, i.e. anurans, are at risk to increasing aridity and drought, examined which ecotypes are more sensitive to water loss from 238 species, and estimated how behavioural activity is impacted by future drought and warming scenarios through biophysical models. Under an intermediate and high emission scenario, 6.6 and 33.5% of areas occupied by anurans will increase to arid-like conditions, and 15.4 and 36.1% are at risk of exposure to a combination of increasing drought intensity, frequency, and duration by 2080-2100, respectively. Critically, increasing arid-like conditions will increase water loss rates and anurans in dry regions will almost double the water loss rates under a high emission scenario. Biophysical models showed that during the warmest quarter of the year, the combination of drought and warming reduced an anuran’s potential activity by 17.9% relative to the current conditions compared to warming alone which reduced potential activity by 8%. Our results exemplify the widespread exposure risk of environmental drying for anurans, posing a serious challenge for the lives of water-sensitive species beyond the effects of temperature alone.
+Species exposed to prolonged drying are at risk of population declines or extinctions. Understanding species' sensitivity to water loss and microhabitat preference, or ecotype, is therefore vital for assessing climate change risks. Here, we mapped global areas where water-sensitive vertebrates, i.e., anurans, will face increasing aridity and drought, analysed ecotype sensitivity to water loss, and modelled behavioural activity impacts under future drought and warming scenarios. Predictions indicate 6.6% to 33.6% of anuran habitats will become arid-like by 2080–2100, with 15.4% to 36.1% exposed to worsening drought, under an intermediate to high emission scenario, respectively. Critically, arid conditions are expected to double water loss rates. Biophysical models demonstrated a 11.45 ± 8.95% reduction in anuran activity under combined drought and warming, compared to the 6.74 ± 3.95% reduction from warming alone in the warmest quarter. These findings underscore the pervasive synergistic threat of warming and environmental drying to anurans.
 
-**Keywords:** amphibian decline, climate change, dehydration, hydroregulation, thermoregulation, macrophysiology
+
+**Keywords:** amphibian decline, climate change, dehydration, desiccation, hydroregulation, macrophysiology, thermoregulation
+
 
 ## License
 This repository is provided by the authors under the MIT License ([MIT](http://opensource.org/licenses/MIT)).
