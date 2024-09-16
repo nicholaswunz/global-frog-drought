@@ -6,7 +6,11 @@ Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)
 
 This repository contains code and data needed to reproduce the article:
 
-**Wu N. C., Bovo, R. P., Enriquez-Urzelai U., Clusella-Trullas S., Kearney, M. R., Navas C. A., & Kong J. D.** (In Prep) Global exposure risk of frogs to increasing environmental dryness. *Journal name*, **xx**, xxx-xxx, DOI: 
+**Wu N. C., Bovo, R. P., Enriquez-Urzelai U., Clusella-Trullas S., Kearney, M. R., Navas C. A., & Kong J. D.** (Accepted) Global exposure risk of frogs to increasing environmental dryness. *Nature Climate Change*, **xx**, xxx-xxx, DOI: 
+
+**When using the data or code from this project, please cite it as:**
+
+**Wu N. C., Bovo, R. P., Enriquez-Urzelai U., Clusella-Trullas S., Kearney, M. R., Navas C. A., & Kong J. D.** (2024) Accepted version of paper data and code of manuscript: Global exposure risk of frogs to increasing environmental dryness. *Zenodo*. DOI: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13743578.svg)](https://doi.org/10.5281/zenodo.13743578)
 
 **Code**
 - `behav_functions.R` - Modified ectotherm function to estimate hydration, body temperature, activity, burrow depth, tree climbing height, thermal tolerance, hydration tolerance, and activity hydration limit.
