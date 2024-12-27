@@ -6,7 +6,7 @@ Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)
 
 This repository contains code and data needed to reproduce the article:
 
-**Wu N. C., Bovo, R. P., Enriquez-Urzelai U., Clusella-Trullas S., Kearney, M. R., Navas C. A., & Kong J. D.** (Accepted) Global exposure risk of frogs to increasing environmental dryness. *Nature Climate Change*, **xx**, xxx-xxx, DOI: 
+**Wu N. C., Bovo, R. P., Enriquez-Urzelai U., Clusella-Trullas S., Kearney, M. R., Navas C. A., & Kong J. D.** (2024) Global exposure risk of frogs to increasing environmental dryness. *Nature Climate Change*, **14**, 1314–1322, DOI: [![DOI](https://zenodo.org/badge/DOI/10.1038/s41558-024-02167-z.svg)](https://doi.org/10.1038/s41558-024-02167-z)
 
 **When using the data or code from this project, please cite it as:**
 
